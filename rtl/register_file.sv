@@ -1,4 +1,4 @@
-module register_file(
+module register_file import sm83_pkg::*;(
     input  logic         clk,
     input  logic         rst_n,
 
@@ -37,20 +37,22 @@ reg_vec_t reg_vec; //eventually replace with bram
 
 always_comb begin
     //output muxing for 8-bit gp regs
-    case (sel8_gp)
-        REG_B: r8_gp = reg_vec.b_c.r8[0];
-        REG_C: r8_gp = reg_vec.b_c.r8[1];
-        REG_D: r8_gp = reg_vec.d_e.r8[0];
-        REG_E: r8_gp = reg_vec.d_e.r8[1];
-        REG_H: r8_gp = reg_vec.h_l.r8[0];
-        REG_L: r8_gp = reg_vec.h_l.r8[1];
+    case (r_sel8_gp)
+        REG_B:   r8_gp = reg_vec.b_c.r8[0];
+        REG_C:   r8_gp = reg_vec.b_c.r8[1];
+        REG_D:   r8_gp = reg_vec.d_e.r8[0];
+        REG_E:   r8_gp = reg_vec.d_e.r8[1];
+        REG_H:   r8_gp = reg_vec.h_l.r8[0];
+        REG_L:   r8_gp = reg_vec.h_l.r8[1];
+        default: r8_gp = 0;
     endcase
 
     //output muxing for 16-bit gp regs
-    case (sel16_gp)
-        REG_BC: r16_gp = reg_vec.b_c.r16;
-        REG_DE: r16_gp = reg_vec.d_e.r16;
-        REG_HL: r16_gp = reg_vec.h_l.r16;
+    case (r_sel16_gp)
+        REG_BC:  r16_gp = reg_vec.b_c.r16;
+        REG_DE:  r16_gp = reg_vec.d_e.r16;
+        REG_HL:  r16_gp = reg_vec.h_l.r16;
+        default: r16_gp = 0;
     endcase
 
     //non-gp registers have bespoke read ports
@@ -78,6 +80,7 @@ always @(posedge clk or negedge rst_n) begin
                 REG_E: reg_vec.d_e.r8[1] <= w8_gp;
                 REG_H: reg_vec.h_l.r8[0] <= w8_gp;
                 REG_L: reg_vec.h_l.r8[1] <= w8_gp;
+                default: ;
             endcase
         end
         else if (wen.gp16) begin
@@ -85,6 +88,7 @@ always @(posedge clk or negedge rst_n) begin
                 REG_BC: reg_vec.b_c.r16 <= w16_gp;
                 REG_DE: reg_vec.d_e.r16 <= w16_gp;
                 REG_HL: reg_vec.h_l.r16 <= w16_gp;
+                default: ;
             endcase
         end
         if (wen.pc) reg_vec.pc <= w_pc;
