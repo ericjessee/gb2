@@ -55,6 +55,7 @@ register_file rf(
     .r_f(),
     .r_sel8_gp(),
     .r_sel16_gp(),
+    .r8_gp(),
     .r16_gp(),
     .r_pc(pc),
     .r_sp(sp)
@@ -78,7 +79,7 @@ idu idu_0(
 
 //address bus output decoding
 always_comb begin
-    r_addr = 0;
+    r_addr = 64;
     if (fetch_cycle) begin
         r_addr = pc;
     end

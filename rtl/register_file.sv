@@ -1,3 +1,5 @@
+`include "global_defines.vh"
+
 module register_file import sm83_pkg::*;(
     input  logic         clk,
     input  logic         rst_n,
@@ -54,6 +56,13 @@ always_comb begin
     r_f  = reg_vec.f;
     r_pc = reg_vec.pc;
     r_sp = reg_vec.sp;
+end
+
+reg_vec_t reg_reset_vals;
+always_comb begin
+    reg_reset_vals = '0;
+    reg_reset_vals.pc = `PC_INIT;
+    reg_reset_vals.sp = `SP_INIT;
 end
 
 always @(posedge clk or negedge rst_n) begin

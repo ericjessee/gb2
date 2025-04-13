@@ -1,0 +1,3 @@
+`define TEST_MEM_DEPTH 128
+`define PC_INIT 16'h0001
+`define SP_INIT `TEST_MEM_DEPTH

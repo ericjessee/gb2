@@ -16,10 +16,12 @@ always @(posedge clk or negedge rst_n) begin
     else begin
         if (execute_last)
             fetch_cycle <= '1;
+        else fetch_cycle <= '0;
         if (fetch_cycle) begin
             execute_cycle <= '1;
             execute_last <= '1;
         end
+        else {execute_cycle, execute_last} = 2'b00;
     end
 
 end

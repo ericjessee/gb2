@@ -23,7 +23,9 @@ eval $analyze_cmd
 if [ $? -eq 0 ]; then
     # Only run these commands if analyze_cmd was successful
     xelab sm83_top_tb -debug typical
-    xsim --runall work.sm83_top_tb
+    # xsim --runall work.sm83_top_tb --gui
+    xsim --gui work.sm83_top_tb --view  /home/eric/Projects/gb2/verif/tb/run_dir/work.sm83_top_tb.wcfg
+    # vivado -script ../start_vivado_waves.tcl
 else
     echo "Analysis failed. Exiting."
     exit 1

@@ -1,4 +1,4 @@
-`define TEST_MEM_DEPTH 128
+`include "global_defines.vh"
 
 module mock_mem import sm83_pkg::*;(
     input  logic clk,
@@ -20,11 +20,12 @@ end
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         //CHEESE initialize mem with some instructions
-        mem[0] <= 8'h00;
-        mem[1] <= 8'h01;
+        mem[0] <= 8'h3e; //load a with immediate
+        mem[1] <= 8'hbe; //immediate = be
+        mem[2] <= 8'h3c; //increment a
 
         //fill rest of memory with something for testing
-        for (int i=2; i<`TEST_MEM_DEPTH; i++)
+        for (int i=3; i<`TEST_MEM_DEPTH; i++)
             mem[i] <= 8'hff;
             
     end else begin

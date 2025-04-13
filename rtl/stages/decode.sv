@@ -11,7 +11,8 @@ module decode import sm83_pkg::*;(
 );
 `include "decode_luts.vh"
 
-alu_op_t bit_op_base;
+alu_op_t  bit_op_base;
+opcode8_t full_opcode;
 
 always_comb begin
     r8_sel = 3'b111;
@@ -21,6 +22,8 @@ always_comb begin
     o_is_instr16 = '0;
     rst_tgt = '0;
     bit_op_base = alu_op_t'(0);
+    jump_cond = j_cond_t'(0);
+    full_opcode = opcode8_t'(instr);
     case (i_is_instr16)
         0: begin
             //check exception cases first
@@ -64,7 +67,7 @@ always_comb begin
                                 jump_cond = instr.body.b0.jp.cond;
                             end
                         end
-                        else if (opcode8_t'(instr) == OP_LDPTR_A16_SP) begin //load SP value to immediate pointer
+                        else if (full_opcode == OP_LDPTR_A16_SP) begin //load SP value to immediate pointer
                             ctl_op = CTL_LDPTR_D16_SP;
                         end
                         else begin //is other 16-bit operation
@@ -103,15 +106,15 @@ always_comb begin
                             ctl_op = CTL_PUSH_STACK;
                             r16_sel.r16stk = instr.body.b3.stack_op.r16stk;
                         end
-                        else if (opcode8_t'(instr) == OP_RET)
+                        else if (full_opcode == OP_RET)
                             ctl_op = CTL_RET;
-                        else if (opcode8_t'(instr) == OP_RETI)
+                        else if (full_opcode == OP_RETI)
                             ctl_op = CTL_RETI;
-                        else if (opcode8_t'(instr) == OP_JP_A16)
+                        else if (full_opcode == OP_JP_A16)
                             ctl_op = CTL_JP_A16;
-                        else if (opcode8_t'(instr) == OP_JP_HL)
+                        else if (full_opcode == OP_JP_HL)
                             ctl_op = CTL_JP_HL;
-                        else if (opcode8_t'(instr) == OP_CALL_A16)
+                        else if (full_opcode == OP_CALL_A16)
                             ctl_op = CTL_CALL_A16;
                         else if (instr.body.b3.rst.const111 == 3'b111) begin
                             ctl_op = CTL_RST;
@@ -130,27 +133,27 @@ always_comb begin
                             jump_cond = instr.body.b3.jp_cond.cond;
                         end
                         //this is dumb also, but all sort of edge cases.
-                        else if (opcode8_t'(instr) == OP_LDPTR_C_A)
+                        else if (full_opcode == OP_LDPTR_C_A)
                             ctl_op = CTL_LDPTR_C_A;
-                        else if (opcode8_t'(instr) == OP_LDPTR_A8_A)
+                        else if (full_opcode == OP_LDPTR_A8_A)
                             ctl_op = CTL_LDPTR_A8_A;
-                        else if (opcode8_t'(instr) == OP_LDPTR_A16_A)
+                        else if (full_opcode == OP_LDPTR_A16_A)
                             ctl_op = CTL_LDPTR_A16_A;
-                        else if (opcode8_t'(instr) == OP_LDPTR_A_C)
+                        else if (full_opcode == OP_LDPTR_A_C)
                             ctl_op = CTL_LDPTR_A_C;
-                        else if (opcode8_t'(instr) == OP_LDPTR_A_A8)
+                        else if (full_opcode == OP_LDPTR_A_A8)
                             ctl_op = CTL_LDPTR_A_A8;
-                        else if (opcode8_t'(instr) == OP_LDPTR_A_A16)
+                        else if (full_opcode == OP_LDPTR_A_A16)
                             ctl_op = CTL_LDPTR_A_A16;
-                        else if (opcode8_t'(instr) == OP_ADD_SP_D8)
+                        else if (full_opcode == OP_ADD_SP_D8)
                             ctl_op = CTL_ADD_SP_D8;
-                        else if (opcode8_t'(instr) == OP_LD_HL_SP_S8)
+                        else if (full_opcode == OP_LD_HL_SP_S8)
                             ctl_op = CTL_LD_HL_SP_D8;
-                        else if (opcode8_t'(instr) == OP_LD_SP_HL)
+                        else if (full_opcode == OP_LD_SP_HL)
                             ctl_op = CTL_LD_SP_HL;
-                        else if (opcode8_t'(instr) == OP_DI)
+                        else if (full_opcode == OP_DI)
                             ctl_op = CTL_DI;
-                        else if (opcode8_t'(instr) == OP_EI)
+                        else if (full_opcode == OP_EI)
                             ctl_op = CTL_EI;                                                        
                     end
                 endcase
