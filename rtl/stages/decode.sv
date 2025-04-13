@@ -14,14 +14,14 @@ module decode import sm83_pkg::*;(
 alu_op_t bit_op_base;
 
 always_comb begin
-    r8_sel = 3'hf;
-    r16_sel = 2'hf;
+    r8_sel = 3'b111;
+    r16_sel = 2'b11;
     alu_op = ALU_NOP;
     ctl_op = CTL_NOP;
     o_is_instr16 = '0;
     rst_tgt = '0;
-    bit_op_base = '0;
-    case (is_instr16)
+    bit_op_base = alu_op_t'(0);
+    case (i_is_instr16)
         0: begin
             //check exception cases first
             if (instr == OP_INSTR_16)
@@ -51,7 +51,7 @@ always_comb begin
                             ctl_op = CTL_LD_R8_D8;
                             r8_sel[0] = instr.body.b0.ldimm8.rd;
                         end
-                        else if (instr.b0.inc8.const10 == 2'b10) begin //is 8-bit inc or dec
+                        else if (instr.body.b0.inc8.const10 == 2'b10) begin //is 8-bit inc or dec
                             ctl_op = CTL_ALU_R8;
                             alu_op = (instr.body.b0.inc8.dec_ninc) ? ALU_DEC : ALU_INC;
                             r8_sel[0] = instr.body.b0.inc8.r8;
@@ -119,15 +119,15 @@ always_comb begin
                         end
                         else if (instr.body.b3.jp_cond.id2 == 3'b000) begin
                             ctl_op = CTL_RET_COND;
-                            jp_cond = instr.body.b3.jp_cond.cond;
+                            jump_cond = instr.body.b3.jp_cond.cond;
                         end
                         else if (instr.body.b3.jp_cond.id2 == 3'b010) begin
                             ctl_op = CTL_JP_COND;
-                            jp_cond = instr.body.b3.jp_cond.cond;
+                            jump_cond = instr.body.b3.jp_cond.cond;
                         end
                         else if (instr.body.b3.jp_cond.id2 == 3'b100) begin
                             ctl_op = CTL_CALL_COND_A16;
-                            jp_cond = instr.body.b3.jp_cond.cond;
+                            jump_cond = instr.body.b3.jp_cond.cond;
                         end
                         //this is dumb also, but all sort of edge cases.
                         else if (opcode8_t'(instr) == OP_LDPTR_C_A)
@@ -141,16 +141,16 @@ always_comb begin
                         else if (opcode8_t'(instr) == OP_LDPTR_A_A8)
                             ctl_op = CTL_LDPTR_A_A8;
                         else if (opcode8_t'(instr) == OP_LDPTR_A_A16)
-                            ctl_op = OP_LDPTR_A_A16;
+                            ctl_op = CTL_LDPTR_A_A16;
                         else if (opcode8_t'(instr) == OP_ADD_SP_D8)
                             ctl_op = CTL_ADD_SP_D8;
                         else if (opcode8_t'(instr) == OP_LD_HL_SP_S8)
-                            ctl_op = CTL_LD_HL_SP_S8;
+                            ctl_op = CTL_LD_HL_SP_D8;
                         else if (opcode8_t'(instr) == OP_LD_SP_HL)
                             ctl_op = CTL_LD_SP_HL;
-                        else if (opcode8_t'(instr) == DI)
+                        else if (opcode8_t'(instr) == OP_DI)
                             ctl_op = CTL_DI;
-                        else if (opcode8_t'(instr) == OP_LD_SP_HL)
+                        else if (opcode8_t'(instr) == OP_EI)
                             ctl_op = CTL_EI;                                                        
                     end
                 endcase
@@ -177,8 +177,8 @@ always_comb begin
                     2'b10: bit_op_base = ALU_RES_0;
                     2'b11: bit_op_base = ALU_SET_0;
                 endcase
+                alu_op = alu_op_t'(bit_op_base + instr.body.cb.bitop.bit_idx);
             end
-            alu_op = bit_op_base + instr.block.cb.bitop.bit_idx;
         end
 
     endcase

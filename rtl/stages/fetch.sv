@@ -10,7 +10,6 @@ module fetch (
     input r16_t r_pc,
     output r16_t new_pc,
     output logic pc_wen,
-
 );
 
 always_comb begin

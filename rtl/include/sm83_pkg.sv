@@ -12,24 +12,24 @@ typedef enum logic [2:0] {
 } gp_r8_sel_t;
 
 typedef enum logic [1:0] {
-    REG_BC,
-    REG_DE,
-    REG_HL,
-    REG_SP,
+    R16_BC,
+    R16_DE,
+    R16_HL,
+    R16_SP
 } gp_r16_sel_t;
 
 typedef enum logic [1:0] {
-    REG_BC,
-    REG_DE,
-    REG_HL,
-    REG_AF,
+    R16STK_BC,
+    R16STK_DE,
+    R16STK_HL,
+    R16STK_AF
 } stk_r16_sel_t;
 
 typedef enum logic [1:0] {
-    REG_BC,
-    REG_DE,
-    REG_HLI,
-    REG_HLD,
+    R16MEM_BC,
+    R16MEM_DE,
+    R16MEM_HLI,
+    R16MEM_HLD
 } mem_r16_sel_t;
 
 typedef enum logic [5:0] {
@@ -63,12 +63,15 @@ typedef enum logic [5:0] {
     ALU_DAA
 } alu_op_t;
 
-typedef enum logic [] {
+typedef enum logic [7:0] { //should be downsized
     CTL_NOP,
     CTL_HALT,
     CTL_STOP, //?
     CTL_RST,
+    CTL_DI,
+    CTL_EI,
     CTL_JR,
+    CTL_JR_COND,
     CTL_JP_COND,
     CTL_JP_A16,
     CTL_JP_HL,
@@ -82,6 +85,9 @@ typedef enum logic [] {
     CTL_ALU_A_D8,
     CTL_ALU_R8,
     CTL_ALU_HL_R16,
+    CTL_ADD_SP_D8,
+    CTL_LD_HL_SP_D8,
+    CTL_LD_SP_HL,
     CTL_LD_R8_D8,
     CTL_LD_R8_R8,
     CTL_LD_R16_D16,
@@ -90,8 +96,16 @@ typedef enum logic [] {
     CTL_LDPTR_R16_D8,
     CTL_LDPTR_R8_R16,
     CTL_LDPTR_D16_SP,
+    CTL_LDPTR_C_A,
+    CTL_LDPTR_A_C,
+    CTL_LDPTR_A8_A,
+    CTL_LDPTR_A_A8,
+    CTL_LDPTR_A16_A,
+    CTL_LDPTR_A_A16,
     CTL_INC16,
-    CTL_DEC16
+    CTL_DEC16,
+    CTL_POP_STACK,
+    CTL_PUSH_STACK
 } ctl_op_t;
 
 typedef enum logic [1:0] { 
@@ -113,19 +127,19 @@ typedef enum logic [3:0] {
     B0_LDPTR_R16_A  = 4'h2,
     B0_LDPTR_A_R16  = 4'ha,
     B0_INC_R16      = 4'h3,
-    B0_DEC_R16,     = 4'hb,
+    B0_DEC_R16      = 4'hb,
     B0_ADD_HL_R16   = 4'h9
 } b0_op16_t;
 
-typedef enum logic [4:0] {
-    B0_RLCA = 5'h0,
-    B0_RRCA = 5'h1,
-    B0_RLA =  5'h2,
-    B0_RRA =  5'h3,
-    B0_DAA =  5'h4,
-    B0_CPL =  5'h5,
-    B0_SCF =  5'h6,
-    B0_CCF =  5'h7
+typedef enum logic [2:0] {
+    B0_RLCA = 3'h0,
+    B0_RRCA = 3'h1,
+    B0_RLA =  3'h2,
+    B0_RRA =  3'h3,
+    B0_DAA =  3'h4,
+    B0_CPL =  3'h5,
+    B0_SCF =  3'h6,
+    B0_CCF =  3'h7
 } b0_op1_t;
 
 typedef enum logic [2:0] {
@@ -205,8 +219,8 @@ typedef union packed {
 } instr_body_b0_t;
 
 typedef struct packed {
-    logic [5:3] rd;
-    logic [2:0] rs;
+    gp_r8_sel_t rd;
+    gp_r8_sel_t rs;
 } instr_body_b1_ld_r8_r8_t;
 
 typedef struct packed {
@@ -247,8 +261,8 @@ typedef union packed {
     instr_body_b3_jp_t        jp;
     instr_body_b3_rst_t       rst;
     instr_body_b3_stack_op_t  stack_op;
-    instr_body_b3_ld_t        ld;
-    instr_body_b3_sp_t        sp_op;
+    //instr_body_b3_ld_t        ld; // doing explicit compares for now
+    //instr_body_b3_sp_t        sp_op;
 } instr_body_b3_t;
 
 typedef struct packed {
@@ -261,7 +275,7 @@ typedef struct packed {
     gp_r8_sel_t r8;
 } instr_body_cb_bit_op_t;
 
-typedef struct packed {
+typedef union packed {
     instr_body_cb_alu_op_t alu;
     instr_body_cb_bit_op_t bitop;
 } instr_body_cb_t;

@@ -201,7 +201,7 @@ typedef enum logic [7:0] {
     OP_RST_0        = 8'hc7,
     OP_RET_Z        = 8'hc8,
     OP_RET          = 8'hc9,
-    OP_JP_NZ_A16    = 8'hca,
+    OP_JP_Z_A16     = 8'hca,
     OP_INSTR_16     = 8'hcb,
     OP_CALL_Z_A16   = 8'hcc,
     OP_CALL_A16     = 8'hcd,

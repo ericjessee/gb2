@@ -1,0 +1,1 @@
+open_wave_database /home/eric/Projects/gb2/verif/tb/run_dir/work.sm83_top_tb.wdb

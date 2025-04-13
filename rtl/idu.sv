@@ -1,7 +1,7 @@
 module idu import sm83_pkg::*;(
-    logic inc_ndec;
-    r16_t r16_in;
-    r16_t r16_out;
+    input logic inc_ndec,
+    input r16_t r16_in,
+    output r16_t r16_out
 );
 
 always_comb begin
