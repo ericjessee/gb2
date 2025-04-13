@@ -120,6 +120,9 @@ always_comb begin
         ALU_SRL: begin
             {full_result[7:0], full_result[8]} = {1'b0, op1} >> 1;
         end
+        ALU_SCF: begin
+            full_result[8] = 1;
+        end
         ALU_CCF: begin
             full_result[8] = !in_flags.c;
         end

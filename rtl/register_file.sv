@@ -26,8 +26,7 @@ module register_file import sm83_pkg::*;(
     
     input  gp_r8_sel_t   r_sel8_gp,
     input  gp_r16_sel_t  r_sel16_gp,
-    output r8_t          r8_gp,
-    output r16_t         r16_gp,
+    output r8_16_t       r16_gp,
 
     output r16_t         r_pc,
     output r16_t         r_sp
