@@ -16,35 +16,38 @@ typedef enum logic [1:0] {
 } gp_r16_sel_t;
 
 typedef enum logic [8:0] {
-    OP_NOP,
-    OP_ADC,
-    OP_ADD,
-    OP_AND,
-    OP_CP,
-    OP_DEC,
-    OP_INC,
-    OP_OR,
-    OP_SBC,
-    OP_SUB,
-    OP_XOR,
-    OP_BIT,
-    OP_RES,
-    OP_SET,
-    OP_SWAP,
-    OP_RL,
-    OP_RLA,
-    OP_RLC,
-    OP_RR,
-    OP_RRA,
-    OP_RRC,
-    OP_RRCA,
-    OP_SLA,
-    OP_SRA,
-    OP_SRL,
-    OP_CCF,
-    OP_CPL,
-    OP_DAA
+    ALU_NOP,
+    ALU_ADC, ALU_ADD,
+    ALU_AND,
+    ALU_CP,
+    ALU_DEC, ALU_INC,
+    ALU_OR,
+    ALU_SBC, ALU_SUB,
+    ALU_XOR,
+    ALU_BIT_0, ALU_BIT_1, ALU_BIT_2, ALU_BIT_3,
+    ALU_BIT_4, ALU_BIT_5, ALU_BIT_6, ALU_BIT_7,
+    ALU_RES_0, ALU_RES_1, ALU_RES_2, ALU_RES_3,
+    ALU_RES_4, ALU_RES_5, ALU_RES_6, ALU_RES_7,
+    ALU_SET_0, ALU_SET_1, ALU_SET_2, ALU_SET_3,
+    ALU_SET_4, ALU_SET_5, ALU_SET_6, ALU_SET_7,
+    ALU_SWAP,
+    ALU_RL,
+    ALU_RLC,
+    ALU_RR,
+    ALU_RRA,
+    ALU_RRC,
+    ALU_RRCA,
+    ALU_SLA,
+    ALU_SRA,
+    ALU_SRL,
+    ALU_CCF,
+    ALU_CPL,
+    ALU_DAA
 } alu_op_t;
+
+// typedef enum logic [] {
+    
+// } opcode_t;
 
 typedef logic [8:0] r8_t;
 
