@@ -1,3 +1,20 @@
+function alu_op_t map_b2_b3_alu_op(
+    input b2_3_alu_op_t alu_op
+);
+begin
+    case (alu_op)
+        ADD: map_b2_b3_alu_op = ALU_ADD;
+        ADC: map_b2_b3_alu_op = ALU_ADC;
+        SUB: map_b2_b3_alu_op = ALU_SUB;
+        SBC: map_b2_b3_alu_op = ALU_SBC;
+        AND: map_b2_b3_alu_op = ALU_AND;
+        XOR: map_b2_b3_alu_op = ALU_XOR;
+        OR:  map_b2_b3_alu_op = ALU_OR;
+        CP:  map_b2_b3_alu_op = ALU_CP;
+    endcase
+end
+endfunction
+
 function gp8_sel_t[0:1] d_ld_r8_r8(
     input data_t instr
 );

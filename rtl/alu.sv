@@ -1,10 +1,10 @@
 module alu import sm83_pkg::*;(
-    input  r8_t     op1,
-    input  r8_t     op2,
+    input  data_t   op1,
+    input  data_t   op2,
     input  flags_t  in_flags,
     input  alu_op_t alu_op,
     output flags_t  out_flags,
-    output r8_t     result
+    output data_t   result
 );
 
 function bit_mask(alu_op_t alu_op);

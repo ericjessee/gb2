@@ -67,9 +67,20 @@ typedef enum logic [] {
     CTL_NOP,
     CTL_HALT,
     CTL_STOP, //?
+    CTL_RST,
     CTL_JR,
+    CTL_JP_COND,
+    CTL_JP_A16,
+    CTL_JP_HL,
+    CTL_CALL_A16,
+    CTL_CALL_COND_A16,
+    CTL_RET_COND,
+    CTL_RET,
+    CTL_RETI,
     CTL_ALU_A,
     CTL_ALU_A_R8,
+    CTL_ALU_A_D8,
+    CTL_ALU_R8,
     CTL_ALU_HL_R16,
     CTL_LD_R8_D8,
     CTL_LD_R8_R8,
@@ -116,6 +127,28 @@ typedef enum logic [4:0] {
     B0_SCF =  5'h6,
     B0_CCF =  5'h7
 } b0_op1_t;
+
+typedef enum logic [2:0] {
+    ADD = 3'h0,
+    ADC = 3'h1,
+    SUB = 3'h2,
+    SBC = 3'h3,
+    AND = 3'h4,
+    XOR = 3'h5,
+    OR  = 3'h6,
+    CP  = 3'h7
+} b2_3_alu_op_t;
+
+typedef enum logic [2:0] {
+    RLC  = 3'h0,
+    RRC  = 3'h1,
+    RL   = 3'h2,
+    RR   = 3'h3,
+    SLA  = 3'h4,
+    SRA  = 3'h5,
+    SWAP = 3'h6,
+    SRL  = 3'h7
+} cb_alu_op_t;
 
 typedef logic [7:0]  r8_t;
 typedef logic [7:0]  data_t;
@@ -176,15 +209,75 @@ typedef struct packed {
     logic [2:0] rs;
 } instr_body_b1_ld_r8_r8_t;
 
+typedef struct packed {
+    b2_3_alu_op_t alu_op;
+    gp_r8_sel_t r8;
+} instr_body_b2_alu_op_t;
+
+typedef struct packed {
+    b2_3_alu_op_t  alu_op;
+    logic [2:0]    const110;
+} instr_body_b3_alu_op_t;
+
+typedef struct packed {
+    logic       const0;
+    j_cond_t    cond;
+    logic [2:0] id2;
+} instr_body_b3_cond_jp_t;
+
+typedef struct packed {
+    logic       id1;
+    logic [4:3] id2;
+    logic [2:0] id3;
+} instr_body_b3_jp_t;
+
+typedef struct packed {
+    logic [5:3] target;
+    logic [2:0] const111;
+} instr_body_b3_rst_t;
+
+typedef struct packed {
+    stk_r16_sel_t r16stk;
+    logic [3:0]   id;
+} instr_body_b3_stack_op_t;
+
+typedef union packed {
+    instr_body_b3_alu_op_t    alu;
+    instr_body_b3_cond_jp_t   jp_cond;
+    instr_body_b3_jp_t        jp;
+    instr_body_b3_rst_t       rst;
+    instr_body_b3_stack_op_t  stack_op;
+    instr_body_b3_ld_t        ld;
+    instr_body_b3_sp_t        sp_op;
+} instr_body_b3_t;
+
+typedef struct packed {
+    cb_alu_op_t alu_op;
+    gp_r8_sel_t r8;
+} instr_body_cb_alu_op_t;
+
+typedef struct packed {
+    cb_alu_op_t bit_idx;
+    gp_r8_sel_t r8;
+} instr_body_cb_bit_op_t;
+
+typedef struct packed {
+    instr_body_cb_alu_op_t alu;
+    instr_body_cb_bit_op_t bitop;
+} instr_body_cb_t;
+
 typedef union packed {
     logic [5:0]              raw;
-    instr_body_b1_ld_r8_r8_t ld_r8_r8;
     instr_body_b0_t          b0;
+    instr_body_b1_ld_r8_r8_t b1;
+    instr_body_b2_alu_op_t   b2;
+    instr_body_b3_t          b3;
+    instr_body_cb_t          cb;
 } instr_body_t;
 
 typedef struct packed {
     instr_block_t block;
-    instr_body_t  body
+    instr_body_t  body;
 } instr_t;
 
 typedef struct packed {

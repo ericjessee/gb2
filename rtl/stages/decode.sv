@@ -6,16 +6,21 @@ module decode import sm83_pkg::*;(
     output r16_sel_t         r16_sel,
     output alu_op_t          alu_op,
     output ctl_op_t          ctl_op,
-    output j_cond_t          jump_cond
+    output j_cond_t          jump_cond,
+    output logic [2:0]       rst_tgt
 );
 `include "decode_luts.vh"
+
+alu_op_t bit_op_base;
 
 always_comb begin
     r8_sel = 3'hf;
     r16_sel = 2'hf;
     alu_op = ALU_NOP;
     ctl_op = CTL_NOP;
-    o_is_instr16 = 0;
+    o_is_instr16 = '0;
+    rst_tgt = '0;
+    bit_op_base = '0;
     case (is_instr16)
         0: begin
             //check exception cases first
@@ -26,13 +31,12 @@ always_comb begin
             else if (instr == OP_STOP)
                 ctl_op = CTL_STOP;
             else begin
-                //decoding scheme based on https://gbdev.io/pandocs/CPU_Instruction_Set.html
+                //decoding scheme closely based on https://gbdev.io/pandocs/CPU_Instruction_Set.html
                 case (instr.block)
                     BLOCK_0: begin
-                        if (instr.body.raw[2:0] == 3'b111) begin //is 1bit op
-                            ctl_op = ALU_OP;
-                            r8_sel[0] = REG_A;
-                            case (instr.body.b0.op1.op)
+                        if (instr.body.b0.op1.const111 == 3'b111) begin //is 1bit op
+                            ctl_op = CTL_ALU_A;
+                            case (instr.body.b0.op1.op) //maybe could be sneakier with these enums
                                 B0_RLCA: alu_op = ALU_RLC;
                                 B0_RRCA: alu_op = ALU_RRCA;
                                 B0_RLA:  alu_op = ALU_RL;
@@ -43,23 +47,24 @@ always_comb begin
                                 B0_CCF:  alu_op = ALU_CCF;
                             endcase
                         end
-                        else if (instr.body.raw[2:0] == 3'b110) begin //is 8 bit immediate load
+                        else if (instr.body.b0.ldimm8.const110 == 3'b110) begin //is 8 bit immediate load
                             ctl_op = CTL_LD_R8_D8;
                             r8_sel[0] = instr.body.b0.ldimm8.rd;
                         end
-                        else if (instr.body.raw[2:1] == 2'b10) begin //is 8-bit inc or dec
-                            ctl_op = ALU_OP;
+                        else if (instr.b0.inc8.const10 == 2'b10) begin //is 8-bit inc or dec
+                            ctl_op = CTL_ALU_R8;
                             alu_op = (instr.body.b0.inc8.dec_ninc) ? ALU_DEC : ALU_INC;
                             r8_sel[0] = instr.body.b0.inc8.r8;
                         end
-                        else if (instr.body.raw == 6'b011000) begin //is unconditional jump to imm 8-bit offset
-                            ctl_op = CTL_JR;
+                        else if (instr.body.b0.jp.const000 == 3'b000) begin //is unconditional jump to imm 8-bit offset
+                            if (!instr.body.b0.jp.is_cond && (instr.body.raw[4:3] == 2'b11))
+                                ctl_op = CTL_JR;
+                            else begin
+                                ctl_op    = CTL_JR_COND;
+                                jump_cond = instr.body.b0.jp.cond;
+                            end
                         end
-                        else if ((instr.body.raw[5] == 1'b1) && (instr.body.raw[2:0] == 3'b000)) begin //conditional relative jump
-                            ctl_op    = CTL_JR_COND;
-                            jump_cond = instr.body.b0.jp.cond;
-                        end
-                        else if (instr.body.raw == 6'b00001000) begin //load 16-bit immediate to stack pointer
+                        else if (opcode8_t'(instr) == OP_LDPTR_A16_SP) begin //load SP value to immediate pointer
                             ctl_op = CTL_LDPTR_D16_SP;
                         end
                         else begin //is other 16-bit operation
@@ -77,17 +82,103 @@ always_comb begin
                     BLOCK_1: begin
                         //only type for block 1 is ld r8 <- r8
                         ctl_op = CTL_LD_R8_R8;
-                        r8_sel[0] = instr.body.ld_r8_r8.rd;
-                        r8_sel[1] = instr.body.ld_r8_r8.rs;
+                        r8_sel[0] = instr.body.b1.rd;
+                        r8_sel[1] = instr.body.b1.rs;
                     end
-
-                    
+                    BLOCK_2: begin
+                        ctl_op = CTL_ALU_A;
+                        r8_sel[1] = instr.body.b2.r8;
+                        alu_op = map_b2_b3_alu_op(instr.body.b2.alu_op);
+                    end
+                    BLOCK_3: begin
+                        if (instr.body.b3.alu.const110 == 3'b110) begin //alu op with 8-bit immediate
+                            ctl_op = CTL_ALU_A_D8;
+                            alu_op = map_b2_b3_alu_op(instr.body.b3.alu.alu_op);
+                        end
+                        else if (instr.body.b3.stack_op.id == 4'b0001) begin //pop 16-bit word from stack
+                            ctl_op = CTL_POP_STACK;
+                            r16_sel.r16stk = instr.body.b3.stack_op.r16stk;
+                        end
+                        else if (instr.body.b3.stack_op.id == 4'b0101) begin //push 16-bit word to stack
+                            ctl_op = CTL_PUSH_STACK;
+                            r16_sel.r16stk = instr.body.b3.stack_op.r16stk;
+                        end
+                        else if (opcode8_t'(instr) == OP_RET)
+                            ctl_op = CTL_RET;
+                        else if (opcode8_t'(instr) == OP_RETI)
+                            ctl_op = CTL_RETI;
+                        else if (opcode8_t'(instr) == OP_JP_A16)
+                            ctl_op = CTL_JP_A16;
+                        else if (opcode8_t'(instr) == OP_JP_HL)
+                            ctl_op = CTL_JP_HL;
+                        else if (opcode8_t'(instr) == OP_CALL_A16)
+                            ctl_op = CTL_CALL_A16;
+                        else if (instr.body.b3.rst.const111 == 3'b111) begin
+                            ctl_op = CTL_RST;
+                            rst_tgt = instr.body.b3.rst.target;
+                        end
+                        else if (instr.body.b3.jp_cond.id2 == 3'b000) begin
+                            ctl_op = CTL_RET_COND;
+                            jp_cond = instr.body.b3.jp_cond.cond;
+                        end
+                        else if (instr.body.b3.jp_cond.id2 == 3'b010) begin
+                            ctl_op = CTL_JP_COND;
+                            jp_cond = instr.body.b3.jp_cond.cond;
+                        end
+                        else if (instr.body.b3.jp_cond.id2 == 3'b100) begin
+                            ctl_op = CTL_CALL_COND_A16;
+                            jp_cond = instr.body.b3.jp_cond.cond;
+                        end
+                        //this is dumb also, but all sort of edge cases.
+                        else if (opcode8_t'(instr) == OP_LDPTR_C_A)
+                            ctl_op = CTL_LDPTR_C_A;
+                        else if (opcode8_t'(instr) == OP_LDPTR_A8_A)
+                            ctl_op = CTL_LDPTR_A8_A;
+                        else if (opcode8_t'(instr) == OP_LDPTR_A16_A)
+                            ctl_op = CTL_LDPTR_A16_A;
+                        else if (opcode8_t'(instr) == OP_LDPTR_A_C)
+                            ctl_op = CTL_LDPTR_A_C;
+                        else if (opcode8_t'(instr) == OP_LDPTR_A_A8)
+                            ctl_op = CTL_LDPTR_A_A8;
+                        else if (opcode8_t'(instr) == OP_LDPTR_A_A16)
+                            ctl_op = OP_LDPTR_A_A16;
+                        else if (opcode8_t'(instr) == OP_ADD_SP_D8)
+                            ctl_op = CTL_ADD_SP_D8;
+                        else if (opcode8_t'(instr) == OP_LD_HL_SP_S8)
+                            ctl_op = CTL_LD_HL_SP_S8;
+                        else if (opcode8_t'(instr) == OP_LD_SP_HL)
+                            ctl_op = CTL_LD_SP_HL;
+                        else if (opcode8_t'(instr) == DI)
+                            ctl_op = CTL_DI;
+                        else if (opcode8_t'(instr) == OP_LD_SP_HL)
+                            ctl_op = CTL_EI;                                                        
+                    end
                 endcase
             end
         end
         1: begin
             //this will be the second byte in the 16-bit instr
-
+            ctl_op = CTL_ALU_R8;
+            r8_sel = instr.body.cb.alu.r8;
+            if (instr.block == 2'b00) begin
+                case (instr.body.cb.alu.alu_op)
+                    RLC:  alu_op = ALU_RLC; 
+                    RRC:  alu_op = ALU_RRC;
+                    RL:   alu_op = ALU_RL;
+                    RR:   alu_op = ALU_RR;
+                    SLA:  alu_op = ALU_SLA;
+                    SRA:  alu_op = ALU_SRA;
+                    SWAP: alu_op = ALU_SWAP;
+                    SRL:  alu_op = ALU_SRL;
+                endcase
+            end else begin
+                case (instr.block)
+                    2'b01: bit_op_base = ALU_BIT_0;
+                    2'b10: bit_op_base = ALU_RES_0;
+                    2'b11: bit_op_base = ALU_SET_0;
+                endcase
+            end
+            alu_op = bit_op_base + instr.block.cb.bitop.bit_idx;
         end
 
     endcase
