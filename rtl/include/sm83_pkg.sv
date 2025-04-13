@@ -1,4 +1,5 @@
 package sm83_pkg;
+`include "opcodes.vh"
 
 typedef enum logic [2:0] {
     REG_B,
@@ -15,7 +16,7 @@ typedef enum logic [1:0] {
     REG_HL
 } gp_r16_sel_t;
 
-typedef enum logic [8:0] {
+typedef enum logic [5:0] {
     ALU_NOP,
     ALU_ADC, ALU_ADD,
     ALU_AND,
@@ -44,10 +45,6 @@ typedef enum logic [8:0] {
     ALU_CPL,
     ALU_DAA
 } alu_op_t;
-
-// typedef enum logic [] {
-    
-// } opcode_t;
 
 typedef logic [8:0] r8_t;
 
