@@ -11,7 +11,7 @@ module mock_mem import sm83_pkg::*;(
 );
 
 //unpacked to hopefully make use of block ram
-data_t mem [`TEST_MEM_DEPTH-1:0];
+data_t mem [0:`TEST_MEM_DEPTH-1];
 
 always_comb begin
     r_data = mem[r_addr];

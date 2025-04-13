@@ -8,6 +8,7 @@ typedef enum logic [2:0] {
     REG_E,
     REG_H,
     REG_L,
+    REG_PTR_HL,
     REG_A
 } gp_r8_sel_t;
 
