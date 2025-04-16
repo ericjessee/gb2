@@ -16,7 +16,7 @@ sm83_top dut(.*);
 
 initial begin
     startup();
-    wait_cycles(100);
+    wait_cycles(10);
     $finish;
 end
 

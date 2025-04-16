@@ -15,13 +15,24 @@ ctl_state_t [0:3] execute_sequence;
 logic [0:3]       current_idx;
 logic [0:3]       last_idx;
 
-assign current_state = ctl_state_t'(execute_sequence >> current_idx*8);
 
+//demux the current state from the sequence vector
+always_comb begin
+    case (current_idx)
+        0: current_state = execute_sequence[0];
+        1: current_state = execute_sequence[1];
+        2: current_state = execute_sequence[2];
+        3: current_state = execute_sequence[3];
+        default: current_state = ctl_state_t'('b111);
+    endcase
+end
+
+//assign a sequence vector based on the current operation
 always_comb begin
     case (ctl_op)
         CTL_LD_R8_D8: begin 
             execute_sequence = {LOAD_IMMEDIATE, IDLE, IDLE, IDLE};
-            last_idx         = 1;
+            last_idx         = 0;
         end
         default: begin
             execute_sequence  = {IDLE, IDLE, IDLE, IDLE};
@@ -31,17 +42,6 @@ always_comb begin
 end
 
 always_comb begin
-    // case (current_idx)
-    //     0: current_state = execute_sequence[0];
-    //     1: current_state = execute_sequence[1];
-    //     2: current_state = execute_sequence[2];
-    //     3: current_state = execute_sequence[3];
-    //     default: current_state = IDLE;
-    // endcase
-    $display("%s, %s, %s, %s", execute_sequence[0].name(), execute_sequence[1].name(), execute_sequence[2].name(), execute_sequence[3].name());
-
-    $display("---------");
-    $display("current_state: %s", current_state.name());
     //output logic
     inc_pc = '0;
     fetch_cycle = '0;
@@ -52,7 +52,6 @@ always_comb begin
         fetch_cycle = 1;
         inc_pc = 1;
         addr_sel = PC;
-         $display("LAST EXECUTE, fetch cycle is %d", fetch_cycle);
 
     end
 
