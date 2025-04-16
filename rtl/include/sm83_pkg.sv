@@ -109,6 +109,18 @@ typedef enum logic [7:0] { //should be downsized
     CTL_PUSH_STACK
 } ctl_op_t;
 
+typedef enum logic [7:0] {
+    IDLE,
+    LOAD_IMMEDIATE
+} ctl_state_t;
+
+typedef enum logic [1:0] {
+    NONE,
+    PC,
+    SP,
+    GP16
+} addr_sel_t;
+
 typedef enum logic [1:0] { 
     J_NZ,
     J_Z,

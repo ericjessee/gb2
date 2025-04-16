@@ -11,8 +11,8 @@ addr_t w_addr;
 
 sm83_top dut(.*);
 
-always @(posedge clk)
-    $display("clock cycle");
+// always @(posedge clk)
+//     $display("clock cycle");
 
 initial begin
     startup();

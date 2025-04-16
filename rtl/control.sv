@@ -1,51 +1,79 @@
 module control import sm83_pkg::*;(
-    input  logic    clk,
-    input  logic    rst_n,
-    input  ctl_op_t ctl_op,
+    input  logic      clk,
+    input  logic      rst_n,
+    input  ctl_op_t   ctl_op,
     
-    output logic    a_wen,
-    output logic    fetch_cycle,
-    output logic    execute_cycle,
-    output logic    execute_last
+    output addr_sel_t addr_sel,
+    output logic      inc_pc,
+    output logic      fetch_cycle,
+    output logic      mem_to_r8
 );
 
-ctl_op_t curr_op;
+ctl_op_t          curr_op;
+ctl_state_t       current_state;
+ctl_state_t [0:3] execute_sequence;
+logic [0:3]       current_idx;
+logic [0:3]       last_idx;
+
+assign current_state = ctl_state_t'(execute_sequence >> current_idx*8);
 
 always_comb begin
-    a_wen      = '0;
-    if (execute_cycle)
-        case (curr_op)
-            CTL_LD_R8_D8: begin
-                
-            end
-            // CTL_ALU_R8: begin
-            //     case ()
-            // end
-        endcase
+    case (ctl_op)
+        CTL_LD_R8_D8: begin 
+            execute_sequence = {LOAD_IMMEDIATE, IDLE, IDLE, IDLE};
+            last_idx         = 1;
+        end
+        default: begin
+            execute_sequence  = {IDLE, IDLE, IDLE, IDLE};
+            last_idx = 3;
+        end
+    endcase
+end
+
+always_comb begin
+    // case (current_idx)
+    //     0: current_state = execute_sequence[0];
+    //     1: current_state = execute_sequence[1];
+    //     2: current_state = execute_sequence[2];
+    //     3: current_state = execute_sequence[3];
+    //     default: current_state = IDLE;
+    // endcase
+    $display("%s, %s, %s, %s", execute_sequence[0].name(), execute_sequence[1].name(), execute_sequence[2].name(), execute_sequence[3].name());
+
+    $display("---------");
+    $display("current_state: %s", current_state.name());
+    //output logic
+    inc_pc = '0;
+    fetch_cycle = '0;
+    mem_to_r8 = '0;
+    addr_sel = NONE;
+    
+    if (current_idx == last_idx) begin
+        fetch_cycle = 1;
+        inc_pc = 1;
+        addr_sel = PC;
+         $display("LAST EXECUTE, fetch cycle is %d", fetch_cycle);
+
+    end
+
+    case (current_state)
+        LOAD_IMMEDIATE: begin
+            addr_sel = PC;
+            inc_pc = 1;
+            mem_to_r8 = 1;
+        end
+    endcase
+
 end
 
 always @(posedge clk or negedge rst_n) begin
-    if(!rst_n) begin
-        fetch_cycle <= '1;
-        execute_cycle <= '0;
-        execute_last <= '0;
-        curr_op <= CTL_NOP;
-    end
-    else begin
-        if (execute_last) begin
-            fetch_cycle <= '1;
-        end
-        else begin
-            fetch_cycle <= '0;
-        end
-
-        if (fetch_cycle) begin
-            execute_cycle <= '1;
-            execute_last <= '1;
-            curr_op <= ctl_op;
-        end
-        else 
-            {execute_cycle, execute_last} = 2'b00;
+    if (!rst_n) begin
+        current_idx <= 0;
+    end else begin
+        if (current_idx == last_idx)
+            current_idx <= 0;
+        else
+            current_idx <= current_idx + 1;
     end
 
 end
