@@ -42,3 +42,6 @@ verif/tb/run_dir/xsim.dir/work.sm83_top_tb/xsimSettings.ini
 **/*.log
 **/*.zip
 **/*.lpr
+**/*.gb
+**/*.mem
+**/*.o
