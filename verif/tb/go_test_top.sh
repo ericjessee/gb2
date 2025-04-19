@@ -20,17 +20,18 @@ analyze_cmd="xvlog \
                 /home/eric/Projects/gb2/rtl/sm83_top.sv \
                 /home/eric/Projects/gb2/verif/tb/sm83_top_tb.sv"
 
+elab_cmd="xelab sm83_top_tb -debug typical"
+
 
 # Run the analyze command
 eval $analyze_cmd
+eval $elab_cmd     
 if [ $? -eq 0 ]; then
-    # Only run these commands if analyze_cmd was successful
-    xelab sm83_top_tb -debug typical
     # xsim --runall work.sm83_top_tb --gui
     xsim --gui work.sm83_top_tb --view  /home/eric/Projects/gb2/verif/tb/run_dir/work.sm83_top_tb.wcfg &
     # vivado -script ../start_vivado_waves.tcl
 else
-    echo "Analysis failed. Exiting."
+    echo "Compile failed. Exiting."
     exit 1
 fi
 popd

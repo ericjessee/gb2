@@ -62,7 +62,7 @@ always_comb begin
                         else if (instr.body.b0.jp.const000 == 3'b000) begin //is unconditional jump to imm 8-bit offset
                             if (!instr.body.b0.jp.is_cond && (instr.body.raw[4:3] == 2'b11))
                                 ctl_op = CTL_JR;
-                            else begin
+                            else if (instr.body.b0.jp.is_cond) begin
                                 ctl_op    = CTL_JR_COND;
                                 jump_cond = instr.body.b0.jp.cond;
                             end

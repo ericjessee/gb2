@@ -111,7 +111,9 @@ typedef enum logic [7:0] { //should be downsized
 
 typedef enum logic [7:0] {
     IDLE,
-    LOAD_IMMEDIATE
+    LOAD_IMMEDIATE,
+    ALU_R8,
+    HALT
 } ctl_state_t;
 
 typedef enum logic [1:0] {

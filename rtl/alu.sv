@@ -29,13 +29,9 @@ logic borrow_from_bit_4;
 always_comb begin
 
     full_result = '0;
-    result = full_result[7:0];
-
     out_flags   = '0;
-    out_flags.z = (result == 0);
-    out_flags.c = full_result[8];
-
-    //used for half carry signal
+    
+    //used for half carry flags
     overflow_from_bit_3 = full_result[4] & !full_result[3]; //??
     borrow_from_bit_4   = full_result[3] & !full_result[4]; //??
 
@@ -136,6 +132,12 @@ always_comb begin
                 full_result = (!in_flags.n) ? (op1 + 8'h60) : (op1 - 8'h60);
         end 
     endcase
+
+
+    result = full_result[7:0];
+
+    out_flags.z = (result == 0);
+    out_flags.c = full_result[8];
 
 end
 

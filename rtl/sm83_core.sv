@@ -5,14 +5,16 @@ module sm83_core import sm83_pkg::*;(
     output data_t w_data,
     output addr_t r_addr,
     output addr_t w_addr,
-    output logic  w_wen
+    output logic  w_wen,
+    output logic halt
 );
 
 //control signals
-logic fetch_cycle;
-
 logic inc_pc;
+logic mem_to_ir;
 logic mem_to_r8;
+logic r8_to_alu_op1;
+logic alu_to_r8;
 
 addr_sel_t addr_sel;
 
@@ -25,6 +27,9 @@ r8_t new_ir;
 r8_t r_a;
 r8_t new_a;
 
+r8_t r_f;
+r8_t new_f;
+
 r8_t r_gp8;
 r8_t new_gp8;
 
@@ -36,13 +41,17 @@ addr_t new_pc;
 addr_t sp;
 addr_t new_sp;
 
+//alu signals
+data_t alu_op1;
+data_t alu_op2;
+data_t alu_res;
+
 //idu signals
 logic idu_inc_ndec;
 r16_t idu_in;
 r16_t idu_out;
 
 //decode signals
-
 logic next_is_instr16;
 logic is_instr16;
 
@@ -58,7 +67,7 @@ always_comb begin
     new_ir = r_ir;
     reg_wen_vec = '0;
 
-    if (fetch_cycle) begin
+    if (mem_to_ir) begin
         new_ir = r_data;
         reg_wen_vec.ir = 1;
     end
@@ -70,11 +79,18 @@ always_comb begin
 
     new_a = r_a;
     new_gp8 = r_gp8;
-    if (mem_to_r8)
+    if (mem_to_r8) begin
         if (decode_r8_sel[0] == REG_A)
             {reg_wen_vec.a, new_a}     = {1'b1, r_data};
         else
             {reg_wen_vec.gp8, new_gp8} = {1'b1, r_data};
+    end
+    else if (alu_to_r8) begin
+        if (decode_r8_sel[0] == REG_A)
+            {reg_wen_vec.a, new_a}     = {1'b1, alu_res};
+        else
+            {reg_wen_vec.gp8, new_gp8} = {1'b1, alu_res};
+    end
 
 end
 
@@ -85,7 +101,7 @@ register_file rf(
     .w_ir(new_ir),
     .w_ie(),
     .w_a(new_a),
-    .w_f(),
+    .w_f(new_f),
     .w_sel8_gp(decode_r8_sel[0]),
     .w_sel16_gp(),
     .w8_gp(new_gp8),
@@ -95,13 +111,34 @@ register_file rf(
     .r_ir(r_ir),
     .r_ie(),
     .r_a(r_a),
-    .r_f(),
+    .r_f(r_f),
     .r_sel8_gp(decode_r8_sel[1]),
     .r_sel16_gp(),
     .r8_gp(r_gp8),
     .r16_gp(r_gp16),
     .r_pc(pc),
     .r_sp(sp)
+);
+
+//alu input mixing
+always_comb begin
+    alu_op1 = 0;
+    alu_op2 = 0;
+    if (r8_to_alu_op1) begin
+        if (decode_r8_sel[0] == REG_A)
+            alu_op1 = r_a;
+        else
+            alu_op1 = r_gp8;
+    end
+end
+
+alu alu_0(
+    .op1(alu_op1),
+    .op2(alu_op2),
+    .in_flags(r_f),
+    .alu_op(decode_alu_op),
+    .out_flags(new_f),
+    .result(alu_res)
 );
 
 //idu input muxing
@@ -148,8 +185,11 @@ control ctl(
     .ctl_op(decode_ctl_op),
     .addr_sel(addr_sel),
     .inc_pc(inc_pc),
-    .fetch_cycle(fetch_cycle),
-    .mem_to_r8(mem_to_r8)
+    .mem_to_ir(mem_to_ir),
+    .mem_to_r8(mem_to_r8),
+    .alu_to_r8(alu_to_r8),
+    .r8_to_alu_op1(r8_to_alu_op1),
+    .halt(halt)
 );
 
 endmodule

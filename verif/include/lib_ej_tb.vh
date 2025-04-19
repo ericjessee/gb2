@@ -17,4 +17,22 @@ task startup();
     end
 endtask
 
-always #`HALF_PERIOD clk = ~clk;
+logic [2:0] halt_ctr;
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        halt_ctr <= 0;
+    end else begin
+        if (halt) begin
+            if (halt_ctr == 0)
+                $display("halting in 3");
+            if (halt_ctr < 3)
+                halt_ctr <= halt_ctr + 1;
+            else
+                $finish;
+        end
+    end
+end
+
+always #`HALF_PERIOD begin
+    clk = ~clk;
+end

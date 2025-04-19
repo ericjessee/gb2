@@ -21,11 +21,21 @@ always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         //CHEESE initialize mem with some instructions
         mem[0] <= 8'h3e; //load a with immediate
-        mem[1] <= 8'hbe; //immediate = be
-        mem[2] <= 8'h3c; //increment a
+        mem[1] <= 8'h10; //immediate 10h
+        mem[2] <= 8'h06; //load b with immediate
+        mem[3] <= 8'h20; //immediate 20h
+        mem[4] <= 8'h0e; //load c with immediate
+        mem[5] <= 8'h30; //immediate 30h
+        mem[6] <= 8'h16; //load d with immediate
+        mem[7] <= 8'h40; //immediate 40h
+        mem[8] <= 8'h3c; //increment a
+        mem[9] <= 8'h04; //increment b
+        mem[10] <= 8'h0c; //increment c
+        mem[11] <= 8'h14; //increment d
+        mem[12] <= 8'h76; //HALT
 
         //fill rest of memory with something for testing
-        for (int i=3; i<`TEST_MEM_DEPTH; i++)
+        for (int i=13; i<`TEST_MEM_DEPTH; i++)
             mem[i] <= 8'hff;
             
     end else begin
