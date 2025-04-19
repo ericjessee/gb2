@@ -25,6 +25,7 @@ endfunction
 logic [8:0] full_result;
 logic overflow_from_bit_3;
 logic borrow_from_bit_4;
+logic no_carry;
 
 always_comb begin
 
@@ -56,6 +57,7 @@ always_comb begin
         end
         ALU_DEC: begin 
             full_result = op1 - 1;
+            no_carry    = 1;
             out_flags.n = 1;
             out_flags.h = borrow_from_bit_4;
         end
@@ -137,7 +139,10 @@ always_comb begin
     result = full_result[7:0];
 
     out_flags.z = (result == 0);
-    out_flags.c = full_result[8];
+    if (no_carry)
+        out_flags.c = 0;
+    else
+        out_flags.c = full_result[8];
 
 end
 

@@ -15,5 +15,9 @@ INC A\
 INC B\
 INC C\
 INC D\
+DEC A\
+DEC B\
+DEC C\
+DEC D\
 HALT
 
