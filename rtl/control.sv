@@ -9,6 +9,7 @@ module control import sm83_pkg::*;(
     output logic      mem_to_r8,
     output logic      alu_to_r8,
     output logic      r8_to_alu_op1,
+    output logic      update_flags,
 
     output logic      halt
 );
@@ -59,6 +60,7 @@ always_comb begin
     mem_to_r8 = '0;
     alu_to_r8 = '0;
     r8_to_alu_op1 = '0;
+    update_flags = '0;
     to_halt = 0;
 
     addr_sel = NONE;
@@ -83,6 +85,7 @@ always_comb begin
             inc_pc = 1;
             alu_to_r8 = 1;
             r8_to_alu_op1 = 1;
+            update_flags = 1;
         end
         HALT: begin
             to_halt = 1;

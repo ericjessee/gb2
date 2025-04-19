@@ -37,3 +37,8 @@ verif/tb/run_dir/xsim.dir/work.sm83_top_tb/xsimcrash.log
 verif/tb/run_dir/xsim.dir/work.sm83_top_tb/xsimk
 verif/tb/run_dir/xsim.dir/work.sm83_top_tb/xsimkernel.log
 verif/tb/run_dir/xsim.dir/work.sm83_top_tb/xsimSettings.ini
+**/*.str
+**/*.jou
+**/*.log
+**/*.zip
+**/*.lpr

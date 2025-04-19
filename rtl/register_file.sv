@@ -8,7 +8,7 @@ module register_file import sm83_pkg::*;(
     input  r8_t          w_ir,
     input  r8_t          w_ie,
     input  r8_t          w_a,  
-    input  r8_t          w_f,
+    input  flags_t       w_f,
     input  gp_r8_sel_t   w_sel8_gp,
     input  gp_r16_sel_t  w_sel16_gp,
     input  r8_t          w8_gp,
@@ -18,7 +18,7 @@ module register_file import sm83_pkg::*;(
     output r8_t          r_ir,
     output r8_t          r_ie,
     output r8_t          r_a,
-    output r8_t          r_f,
+    output flags_t       r_f,
     input  gp_r8_sel_t   r_sel8_gp,
     input  gp_r16_sel_t  r_sel16_gp,
     output r8_t          r8_gp,
@@ -28,6 +28,9 @@ module register_file import sm83_pkg::*;(
 );
 
 reg_vec_t reg_vec; //eventually replace with bram
+
+opcode8_t ir_overlay_opcode8;
+assign ir_overlay_opcode8 = opcode8_t'(reg_vec.ir);
 
 always_comb begin
     //output muxing for 8-bit gp regs

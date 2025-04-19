@@ -10,7 +10,7 @@ module mock_mem import sm83_pkg::*;(
     output data_t r_data
 );
 
-//unpacked to hopefully make use of block ram
+//unpacked to hopefully make use of block ram at some point
 data_t mem [0:`TEST_MEM_DEPTH-1];
 
 always_comb begin
@@ -25,7 +25,7 @@ always @(posedge clk or negedge rst_n) begin
         mem[2] <= 8'h06; //load b with immediate
         mem[3] <= 8'h20; //immediate 20h
         mem[4] <= 8'h0e; //load c with immediate
-        mem[5] <= 8'h30; //immediate 30h
+        mem[5] <= 8'hff; //immediate ffh
         mem[6] <= 8'h16; //load d with immediate
         mem[7] <= 8'h40; //immediate 40h
         mem[8] <= 8'h3c; //increment a

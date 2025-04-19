@@ -13,8 +13,10 @@ module sm83_core import sm83_pkg::*;(
 logic inc_pc;
 logic mem_to_ir;
 logic mem_to_r8;
-logic r8_to_alu_op1;
 logic alu_to_r8;
+logic r8_to_alu_op1;
+logic update_flags;
+
 
 addr_sel_t addr_sel;
 
@@ -33,6 +35,7 @@ r8_t new_f;
 r8_t r_gp8;
 r8_t new_gp8;
 
+gp_r8_sel_t r_sel8_gp;
 r8_16_t r_gp16;
 r8_16_t new_gp16;
 
@@ -67,6 +70,9 @@ always_comb begin
     new_ir = r_ir;
     reg_wen_vec = '0;
 
+    //only control gets to decide when to update flags
+    reg_wen_vec.f = update_flags;
+
     if (mem_to_ir) begin
         new_ir = r_data;
         reg_wen_vec.ir = 1;
@@ -77,6 +83,7 @@ always_comb begin
         reg_wen_vec.pc = 1;
     end
 
+    //input selection
     new_a = r_a;
     new_gp8 = r_gp8;
     if (mem_to_r8) begin
@@ -91,6 +98,13 @@ always_comb begin
         else
             {reg_wen_vec.gp8, new_gp8} = {1'b1, alu_res};
     end
+    
+    //output selection
+    r_sel8_gp = decode_r8_sel[1];
+    if (r8_to_alu_op1)
+        if (decode_r8_sel[0] != REG_A)
+            r_sel8_gp = decode_r8_sel[0];
+    
 
 end
 
@@ -112,7 +126,7 @@ register_file rf(
     .r_ie(),
     .r_a(r_a),
     .r_f(r_f),
-    .r_sel8_gp(decode_r8_sel[1]),
+    .r_sel8_gp(r_sel8_gp),
     .r_sel16_gp(),
     .r8_gp(r_gp8),
     .r16_gp(r_gp16),
@@ -189,6 +203,7 @@ control ctl(
     .mem_to_r8(mem_to_r8),
     .alu_to_r8(alu_to_r8),
     .r8_to_alu_op1(r8_to_alu_op1),
+    .update_flags(update_flags),
     .halt(halt)
 );
 
