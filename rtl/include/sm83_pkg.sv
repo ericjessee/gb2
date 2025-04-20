@@ -92,6 +92,7 @@ typedef enum logic [7:0] { //should be downsized
     CTL_LD_R8_D8,
     CTL_LD_R8_R8,
     CTL_LD_R16_D16,
+    CTL_LDPTR_R8_HL,
     CTL_LDPTR_R16_A,
     CTL_LDPTR_A_R16,
     CTL_LDPTR_R16_D8,
@@ -113,6 +114,8 @@ typedef enum logic [7:0] {
     IDLE,
     LOAD_IMMEDIATE,
     ALU_R8,
+    MEM_TO_Z,
+    STORE_ALU_RESULT,
     HALT
 } ctl_state_t;
 

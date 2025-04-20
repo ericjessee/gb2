@@ -83,10 +83,12 @@ always_comb begin
                         end
                     end
                     BLOCK_1: begin
-                        //only type for block 1 is ld r8 <- r8
-                        ctl_op = CTL_LD_R8_R8;
                         r8_sel[0] = instr.body.b1.rd;
                         r8_sel[1] = instr.body.b1.rs;
+                        if (r8_sel[1] == REG_PTR_HL)
+                            ctl_op = CTL_LDPTR_R8_HL;
+                        else 
+                            ctl_op = CTL_LD_R8_R8;
                     end
                     BLOCK_2: begin
                         ctl_op = CTL_ALU_A;

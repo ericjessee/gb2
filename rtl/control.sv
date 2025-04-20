@@ -43,6 +43,9 @@ always_comb begin
         CTL_ALU_R8: begin
             execute_sequence = {ALU_R8, IDLE, IDLE, IDLE};
         end
+        CTL_LDPTR_R8_HL: begin
+            execute_sequence = {MEM_TO_Z, STORE_ALU_RESULT, IDLE, IDLE};
+        end
         CTL_HALT: begin
             execute_sequence = {IDLE, HALT, IDLE, IDLE};
             last_idx = 1; //sequence becomes don't care
