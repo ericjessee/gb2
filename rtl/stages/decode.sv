@@ -4,6 +4,7 @@ module decode import sm83_pkg::*;(
     output logic             o_is_instr16,
     output gp_r8_sel_t [0:1] r8_sel,
     output r16_sel_t         r16_sel,
+    output gp_r8_sel_t       alu_rd_sel,
     output alu_op_t          alu_op,
     output ctl_op_t          ctl_op,
     output j_cond_t          jump_cond,
@@ -15,7 +16,8 @@ alu_op_t  bit_op_base;
 opcode8_t full_opcode;
 
 always_comb begin
-    r8_sel = 3'b111;
+    r8_sel = '1;
+    alu_rd_sel = gp_r8_sel_t'(4'b1111);
     r16_sel = 2'b11;
     alu_op = ALU_NOP;
     ctl_op = CTL_NOP;
@@ -52,12 +54,15 @@ always_comb begin
                         end
                         else if (instr.body.b0.ldimm8.const110 == 3'b110) begin //is 8 bit immediate load
                             ctl_op = CTL_LD_R8_D8;
-                            r8_sel[0] = instr.body.b0.ldimm8.rd;
+                            alu_op = ALU_LD1;
+                            alu_rd_sel = instr.body.b0.ldimm8.rd;
+                            r8_sel[0]  = REG_Z;
                         end
                         else if (instr.body.b0.inc8.const10 == 2'b10) begin //is 8-bit inc or dec
                             ctl_op = CTL_ALU_R8;
                             alu_op = (instr.body.b0.inc8.dec_ninc) ? ALU_DEC : ALU_INC;
                             r8_sel[0] = instr.body.b0.inc8.r8;
+                            alu_rd_sel = instr.body.b0.inc8.r8;
                         end
                         else if (instr.body.b0.jp.const000 == 3'b000) begin //is unconditional jump to imm 8-bit offset
                             if (!instr.body.b0.jp.is_cond && (instr.body.raw[4:3] == 2'b11))
@@ -83,10 +88,13 @@ always_comb begin
                         end
                     end
                     BLOCK_1: begin
-                        r8_sel[0] = instr.body.b1.rd;
-                        r8_sel[1] = instr.body.b1.rs;
-                        if (r8_sel[1] == REG_PTR_HL)
+                        alu_rd_sel = instr.body.b1.rd;
+                        r8_sel[0]  = instr.body.b1.rs;
+                        alu_op = ALU_LD1;
+                        if (r8_sel[0] == REG_Z) begin
                             ctl_op = CTL_LDPTR_R8_HL;
+                            r16_sel = R16_HL;
+                        end
                         else 
                             ctl_op = CTL_LD_R8_R8;
                     end

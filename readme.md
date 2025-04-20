@@ -7,17 +7,10 @@ https://gbdev.io/pandocs/CPU_Instruction_Set.html \
 https://rgbds.gbdev.io/docs/v0.5.1/gbz80.7
 
 instructions currently implemented and tested:\
-LD A, D8\
-LD B, D8\
-LD C, D8\
-LD D, D8\
-INC A\
-INC B\
-INC C\
-INC D\
-DEC A\
-DEC B\
-DEC C\
-DEC D\
+ld r8,r8
+ld r8,d8
+ld r8,[hl]
+inc r8
+dec r8
 HALT
 

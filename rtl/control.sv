@@ -2,12 +2,16 @@ module control import sm83_pkg::*;(
     input  logic      clk,
     input  logic      rst_n,
     input  ctl_op_t   ctl_op,
-    
+    input  alu_op_t   decoded_alu_op,
+    output alu_op_t   alu_op,
+
     output addr_sel_t addr_sel,
     output logic      inc_pc,
+    output logic      mem_to_z,
+    output logic      mem_to_w,
     output logic      mem_to_ir,
     output logic      mem_to_r8,
-    output logic      alu_to_r8,
+    output logic      capture_alu_res,
     output logic      r8_to_alu_op1,
     output logic      update_flags,
 
@@ -37,60 +41,71 @@ always_comb begin
     last_idx = 0;
     case (ctl_op)
         CTL_LD_R8_D8: begin 
-            execute_sequence = {LOAD_IMMEDIATE, IDLE, IDLE, IDLE};
+            execute_sequence = {EX_MEM_TO_Z, EX_ALU_LD1, EX_IDLE, EX_IDLE};
             last_idx = 1;
         end
+        CTL_LD_R8_R8: begin
+            execute_sequence = {EX_ALU_LD1, EX_IDLE, EX_IDLE, EX_IDLE};
+        end
         CTL_ALU_R8: begin
-            execute_sequence = {ALU_R8, IDLE, IDLE, IDLE};
+            execute_sequence = {EX_ALU_R8, EX_IDLE, EX_IDLE, EX_IDLE};
         end
         CTL_LDPTR_R8_HL: begin
-            execute_sequence = {MEM_TO_Z, STORE_ALU_RESULT, IDLE, IDLE};
+            execute_sequence = {EX_MEM_TO_Z, EX_ALU_LD1, EX_IDLE, EX_IDLE};
+            last_idx = 1;
         end
-        CTL_HALT: begin
-            execute_sequence = {IDLE, HALT, IDLE, IDLE};
+        CTL_HALT: begin //not sure about one cycle delay before halt
+            execute_sequence = {EX_IDLE, EX_HALT, EX_IDLE, EX_IDLE};
             last_idx = 1; //sequence becomes don't care
         end
         default: begin
-            execute_sequence  = {IDLE, IDLE, IDLE, IDLE};
+            execute_sequence  = {EX_IDLE, EX_IDLE, EX_IDLE, EX_IDLE};
         end
     endcase
 end
 
 always_comb begin
     //output logic
+    alu_op = decoded_alu_op;
     inc_pc = '0;
     mem_to_ir = '0;
     mem_to_r8 = '0;
-    alu_to_r8 = '0;
+    capture_alu_res = '0;
     r8_to_alu_op1 = '0;
     update_flags = '0;
     to_halt = 0;
 
-    addr_sel = NONE;
+    addr_sel = PC;
     last = 0;
-    if ((current_idx >= last_idx)) begin
+    //if it is the last execution cycle, fetch the next instruction.
+    //special cases should override this.
+    if ((current_idx >= last_idx)) begin 
         last = 1;
         mem_to_ir = 1;
         inc_pc = 1;
-        addr_sel = PC;
     end
 
     case (current_state)
-        LOAD_IMMEDIATE: begin
-            mem_to_ir = 0;
-            addr_sel = PC;
-            inc_pc = 1;
-            mem_to_r8 = 1;
+        EX_MEM_TO_Z: begin
+            mem_to_z = 1;
+            inc_pc = 0;
+            case (ctl_op)
+                CTL_LDPTR_R8_HL: begin
+                    addr_sel = GP16;
+                end
+                CTL_LD_R8_D8: inc_pc = 1;
+            endcase
         end
-        ALU_R8: begin
-            mem_to_ir = 1;
-            addr_sel = PC;
-            inc_pc = 1;
-            alu_to_r8 = 1;
+        EX_ALU_LD1: begin
+            r8_to_alu_op1 = 1;
+            capture_alu_res = 1;
+        end
+        EX_ALU_R8: begin
+            capture_alu_res = 1;
             r8_to_alu_op1 = 1;
             update_flags = 1;
         end
-        HALT: begin
+        EX_HALT: begin
             to_halt = 1;
         end
     endcase

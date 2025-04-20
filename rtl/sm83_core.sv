@@ -10,13 +10,18 @@ module sm83_core import sm83_pkg::*;(
 );
 
 //control signals
+alu_op_t ctl_alu_op;
 logic inc_pc;
+logic mem_to_z;
+logic mem_to_w;
 logic mem_to_ir;
 logic mem_to_r8;
-logic alu_to_r8;
+logic capture_alu_res;
 logic r8_to_alu_op1;
 logic update_flags;
 
+//WZ register
+r16_t r_wz;
 
 addr_sel_t addr_sel;
 
@@ -60,21 +65,45 @@ logic is_instr16;
 
 gp_r8_sel_t [0:1] decode_r8_sel;
 r16_sel_t         decode_r16_sel;
+gp_r8_sel_t       decode_alu_rd_sel;
 alu_op_t          decode_alu_op;
 ctl_op_t          decode_ctl_op;
 j_cond_t          decode_jump_cond;
 logic [2:0]       decode_rst_tgt;
 
+//flopping for reg wz
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n)
+        r_wz = 0;
+    else
+        if (mem_to_z)
+            r_wz.lsb = r_data;
+        else if (mem_to_w)
+            r_wz.msb = r_data;
+end
+
+
 //register file muxing
 always_comb begin
-    new_ir = r_ir;
+    new_ir = r_data; //ir only takes instructions from memory
     reg_wen_vec = '0;
+
+    new_a = alu_res;
+    new_gp8 = alu_res;
+
+    //gp8 selection comes straight from decode. just need wen
+    if (capture_alu_res) begin
+        case (decode_alu_rd_sel) 
+            REG_A: reg_wen_vec.a = 1;
+            REG_Z: ;
+            default: reg_wen_vec.gp8 = 1;
+        endcase
+    end
 
     //only control gets to decide when to update flags
     reg_wen_vec.f = update_flags;
 
     if (mem_to_ir) begin
-        new_ir = r_data;
         reg_wen_vec.ir = 1;
     end
 
@@ -84,27 +113,16 @@ always_comb begin
     end
 
     //input selection
-    new_a = r_a;
-    new_gp8 = r_gp8;
-    if (mem_to_r8) begin
-        if (decode_r8_sel[0] == REG_A)
-            {reg_wen_vec.a, new_a}     = {1'b1, r_data};
-        else
-            {reg_wen_vec.gp8, new_gp8} = {1'b1, r_data};
-    end
-    else if (alu_to_r8) begin
-        if (decode_r8_sel[0] == REG_A)
-            {reg_wen_vec.a, new_a}     = {1'b1, alu_res};
-        else
-            {reg_wen_vec.gp8, new_gp8} = {1'b1, alu_res};
-    end
+    // new_a = r_a;
+    // new_gp8 = r_gp8;
+    // if (mem_to_r8) begin
+    //     if (decode_r8_sel[0] == REG_A)
+    //         {reg_wen_vec.a, new_a}     = {1'b1, r_data};
+    //     else
+    //         {reg_wen_vec.gp8, new_gp8} = {1'b1, r_data};
+    // end
     
-    //output selection
-    r_sel8_gp = decode_r8_sel[1];
-    if (r8_to_alu_op1)
-        if (decode_r8_sel[0] != REG_A)
-            r_sel8_gp = decode_r8_sel[0];
-    
+    //rf output selection
 
 end
 
@@ -116,7 +134,7 @@ register_file rf(
     .w_ie(),
     .w_a(new_a),
     .w_f(new_f),
-    .w_sel8_gp(decode_r8_sel[0]),
+    .w_sel8_gp(decode_alu_rd_sel),
     .w_sel16_gp(),
     .w8_gp(new_gp8),
     .w16_gp(new_gp16),
@@ -126,8 +144,8 @@ register_file rf(
     .r_ie(),
     .r_a(r_a),
     .r_f(r_f),
-    .r_sel8_gp(r_sel8_gp),
-    .r_sel16_gp(),
+    .r_sel8_gp(decode_r8_sel[0]),
+    .r_sel16_gp(decode_r16_sel.r16),
     .r8_gp(r_gp8),
     .r16_gp(r_gp16),
     .r_pc(pc),
@@ -141,6 +159,8 @@ always_comb begin
     if (r8_to_alu_op1) begin
         if (decode_r8_sel[0] == REG_A)
             alu_op1 = r_a;
+        else if (decode_r8_sel[0] == REG_Z)
+            alu_op1 = r_wz.lsb;
         else
             alu_op1 = r_gp8;
     end
@@ -150,7 +170,7 @@ alu alu_0(
     .op1(alu_op1),
     .op2(alu_op2),
     .in_flags(r_f),
-    .alu_op(decode_alu_op),
+    .alu_op(ctl_alu_op),
     .out_flags(new_f),
     .result(alu_res)
 );
@@ -178,6 +198,7 @@ always_comb begin
         PC:   r_addr = pc;
         SP:   r_addr = sp;
         GP16: r_addr = addr_t'(r_gp16);
+        WZ:   r_addr = addr_t'(r_wz);
     endcase
 end
 
@@ -187,6 +208,7 @@ decode decode_0 (
     .o_is_instr16(next_is_instr16),
     .r8_sel(decode_r8_sel),
     .r16_sel(decode_r16_sel),
+    .alu_rd_sel(decode_alu_rd_sel),
     .alu_op(decode_alu_op),
     .ctl_op(decode_ctl_op),
     .jump_cond(decode_jump_cond),
@@ -197,11 +219,15 @@ control ctl(
     .clk(clk),
     .rst_n(rst_n),
     .ctl_op(decode_ctl_op),
+    .decoded_alu_op(decode_alu_op),
+    .alu_op(ctl_alu_op),
     .addr_sel(addr_sel),
     .inc_pc(inc_pc),
+    .mem_to_z(mem_to_z),
+    .mem_to_w(mem_to_w),
     .mem_to_ir(mem_to_ir),
     .mem_to_r8(mem_to_r8),
-    .alu_to_r8(alu_to_r8),
+    .capture_alu_res(capture_alu_res),
     .r8_to_alu_op1(r8_to_alu_op1),
     .update_flags(update_flags),
     .halt(halt)

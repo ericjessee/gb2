@@ -8,7 +8,7 @@ typedef enum logic [2:0] {
     REG_E,
     REG_H,
     REG_L,
-    REG_PTR_HL,
+    REG_Z,
     REG_A
 } gp_r8_sel_t;
 
@@ -35,6 +35,8 @@ typedef enum logic [1:0] {
 
 typedef enum logic [5:0] {
     ALU_NOP,
+    ALU_LD1,
+    ALU_LD2,
     ALU_ADC, ALU_ADD,
     ALU_AND,
     ALU_CP,
@@ -111,19 +113,20 @@ typedef enum logic [7:0] { //should be downsized
 } ctl_op_t;
 
 typedef enum logic [7:0] {
-    IDLE,
-    LOAD_IMMEDIATE,
-    ALU_R8,
-    MEM_TO_Z,
-    STORE_ALU_RESULT,
-    HALT
+    EX_IDLE,
+    EX_LOAD_IMMEDIATE,
+    EX_ALU_R8,
+    EX_ALU_LD1,
+    EX_MEM_TO_Z,
+    EX_HALT
 } ctl_state_t;
 
-typedef enum logic [1:0] {
+typedef enum logic [2:0] {
     NONE,
     PC,
     SP,
-    GP16
+    GP16,
+    WZ
 } addr_sel_t;
 
 typedef enum logic [1:0] { 

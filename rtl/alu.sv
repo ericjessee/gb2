@@ -25,7 +25,13 @@ endfunction
 logic [8:0] full_result;
 logic overflow_from_bit_3;
 logic borrow_from_bit_4;
-logic no_carry;
+logic ignore_carry;
+
+always_comb begin
+    //dumb way to do this probably
+    overflow_from_bit_3 = (op1[3:0] == 4'hf);
+    borrow_from_bit_4   = (op1[3:0] == 4'h0);
+end
 
 always_comb begin
 
@@ -33,11 +39,14 @@ always_comb begin
     out_flags   = '0;
     
     //used for half carry flags
-    overflow_from_bit_3 = full_result[4] & !full_result[3]; //??
-    borrow_from_bit_4   = full_result[3] & !full_result[4]; //??
-
     case(alu_op)
         ALU_NOP: ;
+        ALU_LD1: begin
+            full_result[7:0] = op1;
+        end
+        ALU_LD2: begin
+            full_result[7:0] = op2;
+        end
         ALU_ADC: begin
             full_result = op1 + op2 + in_flags.c;
             out_flags.h = overflow_from_bit_3;
@@ -56,10 +65,10 @@ always_comb begin
             out_flags.h = borrow_from_bit_4;
         end
         ALU_DEC: begin 
-            full_result = op1 - 1;
-            no_carry    = 1;
-            out_flags.n = 1;
-            out_flags.h = borrow_from_bit_4;
+            full_result  = op1 - 1;
+            ignore_carry = 1;
+            out_flags.n  = 1;
+            out_flags.h  = borrow_from_bit_4;
         end
         ALU_INC: begin
             full_result = op1 + 1;
@@ -139,7 +148,7 @@ always_comb begin
     result = full_result[7:0];
 
     out_flags.z = (result == 0);
-    if (no_carry)
+    if (ignore_carry)
         out_flags.c = 0;
     else
         out_flags.c = full_result[8];
