@@ -90,13 +90,19 @@ always_comb begin
                     BLOCK_1: begin
                         alu_rd_sel = instr.body.b1.rd;
                         r8_sel[0]  = instr.body.b1.rs;
-                        alu_op = ALU_LD1;
-                        if (r8_sel[0] == REG_Z) begin
+                        if (r8_sel[0] == REG_Z) begin //these should be mutually exclusive
                             ctl_op = CTL_LDPTR_R8_HL;
+                            alu_op = ALU_LD1;
                             r16_sel = R16_HL;
                         end
-                        else 
+                        else if (alu_rd_sel == REG_Z) begin //these should be mutually exclusive
+                            ctl_op = CTL_LDPTR_HL_R8;
+                            r16_sel = R16_HL;
+                        end
+                        else begin
                             ctl_op = CTL_LD_R8_R8;
+                            alu_op = ALU_LD1;
+                        end
                     end
                     BLOCK_2: begin
                         ctl_op = CTL_ALU_A;

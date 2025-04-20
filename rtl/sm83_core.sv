@@ -19,6 +19,7 @@ logic mem_to_r8;
 logic capture_alu_res;
 logic r8_to_alu_op1;
 logic update_flags;
+logic r8_to_mem;
 
 //WZ register
 r16_t r_wz;
@@ -112,18 +113,6 @@ always_comb begin
         reg_wen_vec.pc = 1;
     end
 
-    //input selection
-    // new_a = r_a;
-    // new_gp8 = r_gp8;
-    // if (mem_to_r8) begin
-    //     if (decode_r8_sel[0] == REG_A)
-    //         {reg_wen_vec.a, new_a}     = {1'b1, r_data};
-    //     else
-    //         {reg_wen_vec.gp8, new_gp8} = {1'b1, r_data};
-    // end
-    
-    //rf output selection
-
 end
 
 register_file rf(
@@ -194,12 +183,23 @@ idu idu_0(
 //address bus output demuxing
 always_comb begin
     r_addr = 64; //chosen at random for debug
-    case (addr_sel)
-        PC:   r_addr = pc;
-        SP:   r_addr = sp;
-        GP16: r_addr = addr_t'(r_gp16);
-        WZ:   r_addr = addr_t'(r_wz);
+    case (addr_sel) //w_addr may not be needed for some of these
+        PC:   {r_addr, w_addr} = {pc, pc};
+        SP:   {r_addr, w_addr} = {sp, sp};
+        GP16: {r_addr, w_addr} = {addr_t'(r_gp16), addr_t'(r_gp16)};
+        WZ:   {r_addr, w_addr} = {addr_t'(r_wz), addr_t'(r_wz)};
     endcase
+end
+
+//data bus output and write enable
+always_comb begin
+    w_wen = '0;
+    if (r8_to_mem)
+        w_wen = '1;
+        if (decode_r8_sel[0] == REG_A)
+            w_data = r_a;
+        else
+            w_data = r_gp8;
 end
 
 decode decode_0 (
@@ -230,6 +230,7 @@ control ctl(
     .capture_alu_res(capture_alu_res),
     .r8_to_alu_op1(r8_to_alu_op1),
     .update_flags(update_flags),
+    .r8_to_mem(r8_to_mem),
     .halt(halt)
 );
 

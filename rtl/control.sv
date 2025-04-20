@@ -14,6 +14,7 @@ module control import sm83_pkg::*;(
     output logic      capture_alu_res,
     output logic      r8_to_alu_op1,
     output logic      update_flags,
+    output logic      r8_to_mem,
 
     output logic      halt
 );
@@ -54,6 +55,10 @@ always_comb begin
             execute_sequence = {EX_MEM_TO_Z, EX_ALU_LD1, EX_IDLE, EX_IDLE};
             last_idx = 1;
         end
+        CTL_LDPTR_HL_R8: begin
+            execute_sequence = {EX_R8_TO_MEM, EX_IDLE, EX_IDLE, EX_IDLE};
+            last_idx = 1;
+        end
         CTL_HALT: begin //not sure about one cycle delay before halt
             execute_sequence = {EX_IDLE, EX_HALT, EX_IDLE, EX_IDLE};
             last_idx = 1; //sequence becomes don't care
@@ -73,7 +78,8 @@ always_comb begin
     capture_alu_res = '0;
     r8_to_alu_op1 = '0;
     update_flags = '0;
-    to_halt = 0;
+    r8_to_mem = '0;
+    to_halt = '0;
 
     addr_sel = PC;
     last = 0;
@@ -95,6 +101,11 @@ always_comb begin
                 end
                 CTL_LD_R8_D8: inc_pc = 1;
             endcase
+        end
+        EX_R8_TO_MEM: begin
+            inc_pc    = '0;
+            r8_to_mem = '1;
+            addr_sel  = GP16;
         end
         EX_ALU_LD1: begin
             r8_to_alu_op1 = 1;

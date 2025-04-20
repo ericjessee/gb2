@@ -10,6 +10,7 @@ instructions currently implemented and tested:\
 ld r8,r8
 ld r8,d8
 ld r8,[hl]
+ld [hl],r8
 inc r8
 dec r8
 HALT
