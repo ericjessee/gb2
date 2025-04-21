@@ -78,6 +78,10 @@ always_comb begin
             execute_sequence = {EX_MEM_TO_Z, EX_ALU_LD1, EX_IDLE, EX_IDLE};
             last_idx = 1;
         end
+        CTL_LDPTRH_C_A: begin
+            execute_sequence = {EX_A_TO_C_MEM, EX_IDLE, EX_IDLE, EX_IDLE};
+            last_idx = 1;
+        end
         CTL_HALT: begin //not sure about one cycle delay before halt
             execute_sequence = {EX_IDLE, EX_HALT, EX_IDLE, EX_IDLE};
             last_idx = 1;
@@ -155,6 +159,10 @@ always_comb begin
         EX_A_TO_WZ_MEM: begin
             r8_to_mem = '1;
             addr_sel  = WZ;
+        end
+        EX_A_TO_C_MEM: begin
+            r8_to_mem = '1;
+            addr_sel  = FF_C;
         end
         EX_HALT: begin
             to_halt = 1;

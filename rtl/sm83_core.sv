@@ -39,8 +39,8 @@ r8_t new_a;
 r8_t r_f;
 r8_t new_f;
 
-r8_t r_gp8;
-r8_t new_gp8;
+r16_t r_gp8;
+r8_t  new_gp8;
 
 gp_r8_sel_t r_sel8_gp;
 r8_16_t r_gp16;
@@ -134,7 +134,7 @@ register_file rf(
     .r_ie(),
     .r_a(r_a),
     .r_f(r_f),
-    .r_sel8_gp(decode_r8_sel[0]),
+    .r_sel8_gp(decode_r8_sel),
     .r_sel16_gp(decode_r16_sel.r16),
     .r8_gp(r_gp8),
     .r16_gp(r_gp16),
@@ -152,7 +152,7 @@ always_comb begin
         else if (decode_r8_sel[0] == REG_Z)
             alu_op1 = r_wz.lsb;
         else
-            alu_op1 = r_gp8;
+            alu_op1 = r_gp8[0];
     end
     if (decode_r8_sel[1] == REG_Z)
         alu_op2 = r_wz.lsb;
@@ -191,7 +191,7 @@ always_comb begin
         SP:   {r_addr, w_addr} = {sp, sp};
         GP16: {r_addr, w_addr} = {addr_t'(r_gp16), addr_t'(r_gp16)};
         WZ:   {r_addr, w_addr} = {addr_t'(r_wz), addr_t'(r_wz)};
-        FF_C: {r_addr, w_addr} = {addr_t'({8'hff, r_gp8}), addr_t'({8'hff, r_gp8})};
+        FF_C: {r_addr, w_addr} = {addr_t'({8'hff, r_gp8[0]}), addr_t'({8'hff, r_gp8[0]})};
     endcase
 end
 

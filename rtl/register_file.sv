@@ -19,9 +19,9 @@ module register_file import sm83_pkg::*;(
     output r8_t          r_ie,
     output r8_t          r_a,
     output flags_t       r_f,
-    input  gp_r8_sel_t   r_sel8_gp,
+    input  gp_r8_sel_t [0:1] r_sel8_gp,
     input  gp_r16_sel_t  r_sel16_gp,
-    output r8_t          r8_gp,
+    output r16_t         r8_gp,
     output r8_16_t       r16_gp,
     output r16_t         r_pc,
     output r16_t         r_sp
@@ -34,14 +34,23 @@ assign ir_overlay_opcode8 = opcode8_t'(reg_vec.ir);
 
 always_comb begin
     //output muxing for 8-bit gp regs
-    case (r_sel8_gp)
-        REG_B:   r8_gp = reg_vec.b_c.r8[0];
-        REG_C:   r8_gp = reg_vec.b_c.r8[1];
-        REG_D:   r8_gp = reg_vec.d_e.r8[0];
-        REG_E:   r8_gp = reg_vec.d_e.r8[1];
-        REG_H:   r8_gp = reg_vec.h_l.r8[0];
-        REG_L:   r8_gp = reg_vec.h_l.r8[1];
-        default: r8_gp = 0;
+    case (r_sel8_gp[0])
+        REG_B:   r8_gp.msb = reg_vec.b_c.r8[0];
+        REG_C:   r8_gp.msb = reg_vec.b_c.r8[1];
+        REG_D:   r8_gp.msb = reg_vec.d_e.r8[0];
+        REG_E:   r8_gp.msb = reg_vec.d_e.r8[1];
+        REG_H:   r8_gp.msb = reg_vec.h_l.r8[0];
+        REG_L:   r8_gp.msb = reg_vec.h_l.r8[1];
+        default: r8_gp.msb = 0;
+    endcase
+    case (r_sel8_gp[1])
+        REG_B:   r8_gp.lsb = reg_vec.b_c.r8[0];
+        REG_C:   r8_gp.lsb = reg_vec.b_c.r8[1];
+        REG_D:   r8_gp.lsb = reg_vec.d_e.r8[0];
+        REG_E:   r8_gp.lsb = reg_vec.d_e.r8[1];
+        REG_H:   r8_gp.lsb = reg_vec.h_l.r8[0];
+        REG_L:   r8_gp.lsb = reg_vec.h_l.r8[1];
+        default: r8_gp.lsb = 0;
     endcase
 
     //output muxing for 16-bit gp regs
