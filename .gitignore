@@ -45,3 +45,4 @@ verif/tb/run_dir/xsim.dir/work.sm83_top_tb/xsimSettings.ini
 **/*.gb
 **/*.mem
 **/*.o
+rtl/mock_mem_pathed.sv

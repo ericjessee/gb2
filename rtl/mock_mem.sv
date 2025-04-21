@@ -14,7 +14,7 @@ module mock_mem import sm83_pkg::*;(
 data_t mem [0:`TEST_MEM_DEPTH-1];
 
 initial begin
-    $readmemh("/home/eric/Projects/gb2/asm/scripts/build_dir/test_jp_a16.mem", mem);
+    $readmemh(>>mempath<<, mem);  //mempath must be replaced by script!
 end
 
 always_comb begin

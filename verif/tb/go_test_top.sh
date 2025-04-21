@@ -1,24 +1,40 @@
 #!/bin/bash
+#my vivado install is in a weird location, so i added this here.
+#i will assume that you have already sourced your settings64.sh, so leaving it commented out.
+#source ~/usbdisk/Xilinx/Vivado/2024.2/settings64.sh
 
-source ~/usbdisk/Xilinx/Vivado/2024.2/settings64.sh
+echo "compile the gb asm file..."
+pushd ../../asm/scripts
+basename=$(basename $1 .gameboy.asm)
+./build.sh $1
+popd
 
+echo "replacing correct mem path..."
+python3 replace_mem_path.py ../../rtl/mock_mem.sv ../../../asm/scripts/build_dir/$basename.mem
+
+echo "run the vivado commands..."
 mkdir -p run_dir
 pushd run_dir
 
+relpath_rtl=../../../rtl
+relpath_rtl_inc=$relpath_rtl/include
+relpath_verif=../..
+relpath_verif_include=$relpath_verif/include
+
 analyze_cmd="xvlog \
-                -i /home/eric/Projects/gb2/rtl/include \
-                -i /home/eric/Projects/gb2/verif/include \
+                -i $relpath_rtl_inc \
+                -i $relpath_verif_include \
                 -sv \
-                /home/eric/Projects/gb2/rtl/include/sm83_pkg.sv \
-                /home/eric/Projects/gb2/rtl/register_file.sv \
-                /home/eric/Projects/gb2/rtl/idu.sv \
-                /home/eric/Projects/gb2/rtl/alu.sv \
-                /home/eric/Projects/gb2/rtl/stages/decode.sv \
-                /home/eric/Projects/gb2/rtl/control.sv \
-                /home/eric/Projects/gb2/rtl/mock_mem.sv \
-                /home/eric/Projects/gb2/rtl/sm83_core.sv \
-                /home/eric/Projects/gb2/rtl/sm83_top.sv \
-                /home/eric/Projects/gb2/verif/tb/sm83_top_tb.sv"
+                $relpath_rtl_inc/sm83_pkg.sv \
+                $relpath_rtl/register_file.sv \
+                $relpath_rtl/idu.sv \
+                $relpath_rtl/alu.sv \
+                $relpath_rtl/stages/decode.sv \
+                $relpath_rtl/control.sv \
+                $relpath_rtl/mock_mem_pathed.sv \
+                $relpath_rtl/sm83_core.sv \
+                $relpath_rtl/sm83_top.sv \
+                $relpath_verif/tb/sm83_top_tb.sv"
 
 elab_cmd="xelab sm83_top_tb -debug typical"
 
@@ -37,5 +53,5 @@ if [ $? -ne 0 ]; then
 fi
 
 # Run the simulation if both commands are successful
-xsim --gui work.sm83_top_tb --view /home/eric/Projects/gb2/verif/tb/run_dir/work.sm83_top_tb.wcfg &
+xsim --gui work.sm83_top_tb --view work.sm83_top_tb.wcfg &
 popd

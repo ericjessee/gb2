@@ -1,12 +1,11 @@
 #!/bin/bash
 #rgbds assembler (https://rgbds.gbdev.io/)
 #usage: build_test.sh [ASM_FILE]
-#assumes asm file is in this directory
 fname=$(basename $1 .gameboy.asm)
 mkdir -p build_dir
 pushd build_dir
 echo "assembling..."
-rgbasm -o $fname.o ../../tests/$1
+rgbasm -o $fname.o $1
 echo "linking..."
 #the -x option removes padding
 rgblink -o $fname.gb $fname.o
