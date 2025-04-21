@@ -53,10 +53,16 @@ always_comb begin
                             endcase
                         end
                         else if (instr.body.b0.ldimm8.const110 == 3'b110) begin //is 8 bit immediate load
-                            ctl_op = CTL_LD_R8_D8;
-                            alu_op = ALU_LD1;
                             alu_rd_sel = instr.body.b0.ldimm8.rd;
                             r8_sel[0]  = REG_Z;
+                            if (alu_rd_sel == REG_Z) begin
+                                ctl_op  = CTL_LDPTR_HL_D8;
+                                r16_sel = R16_HL;
+                            end
+                            else begin
+                                ctl_op = CTL_LD_R8_D8;
+                                alu_op = ALU_LD1;
+                            end
                         end
                         else if (instr.body.b0.inc8.const10 == 2'b10) begin //is 8-bit inc or dec
                             ctl_op = CTL_ALU_R8;

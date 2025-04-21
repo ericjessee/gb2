@@ -20,6 +20,7 @@ logic capture_alu_res;
 logic r8_to_alu_op1;
 logic update_flags;
 logic r8_to_mem;
+logic z_to_mem;
 
 //WZ register
 r16_t r_wz;
@@ -194,12 +195,17 @@ end
 //data bus output and write enable
 always_comb begin
     w_wen = '0;
-    if (r8_to_mem)
+    if (r8_to_mem) begin
         w_wen = '1;
         if (decode_r8_sel[0] == REG_A)
             w_data = r_a;
         else
             w_data = r_gp8;
+    end
+    else if (z_to_mem) begin
+        w_wen = '1;
+        w_data = r_wz.lsb;
+    end
 end
 
 decode decode_0 (
@@ -231,6 +237,7 @@ control ctl(
     .r8_to_alu_op1(r8_to_alu_op1),
     .update_flags(update_flags),
     .r8_to_mem(r8_to_mem),
+    .z_to_mem(z_to_mem),
     .halt(halt)
 );
 

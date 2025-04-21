@@ -15,6 +15,7 @@ module control import sm83_pkg::*;(
     output logic      r8_to_alu_op1,
     output logic      update_flags,
     output logic      r8_to_mem,
+    output logic      z_to_mem,
 
     output logic      halt
 );
@@ -59,6 +60,10 @@ always_comb begin
             execute_sequence = {EX_R8_TO_MEM, EX_IDLE, EX_IDLE, EX_IDLE};
             last_idx = 1;
         end
+        CTL_LDPTR_HL_D8: begin
+            execute_sequence = {EX_MEM_TO_Z, EX_Z_TO_MEM, EX_IDLE, EX_IDLE};
+            last_idx = 2;
+        end
         CTL_HALT: begin //not sure about one cycle delay before halt
             execute_sequence = {EX_IDLE, EX_HALT, EX_IDLE, EX_IDLE};
             last_idx = 1; //sequence becomes don't care
@@ -79,42 +84,44 @@ always_comb begin
     r8_to_alu_op1 = '0;
     update_flags = '0;
     r8_to_mem = '0;
+    z_to_mem  = '0;
     to_halt = '0;
 
     addr_sel = PC;
     last = 0;
     //if it is the last execution cycle, fetch the next instruction.
     //special cases should override this.
-    if ((current_idx >= last_idx)) begin 
+    if (current_idx >= last_idx) begin 
         last = 1;
         mem_to_ir = 1;
         inc_pc = 1;
     end
 
     case (current_state)
-        EX_MEM_TO_Z: begin
-            mem_to_z = 1;
-            inc_pc = 0;
-            case (ctl_op)
-                CTL_LDPTR_R8_HL: begin
-                    addr_sel = GP16;
-                end
-                CTL_LD_R8_D8: inc_pc = 1;
-            endcase
-        end
-        EX_R8_TO_MEM: begin
-            inc_pc    = '0;
-            r8_to_mem = '1;
-            addr_sel  = GP16;
-        end
-        EX_ALU_LD1: begin
-            r8_to_alu_op1 = 1;
-            capture_alu_res = 1;
-        end
         EX_ALU_R8: begin
             capture_alu_res = 1;
-            r8_to_alu_op1 = 1;
-            update_flags = 1;
+            r8_to_alu_op1   = 1;
+            update_flags    = 1;
+        end
+        EX_ALU_LD1: begin
+            r8_to_alu_op1   = 1;
+            capture_alu_res = 1;
+        end
+        EX_MEM_TO_Z: begin
+            mem_to_z = 1;
+            case (ctl_op)
+                CTL_LDPTR_R8_HL: addr_sel = GP16;
+                CTL_LDPTR_HL_D8: inc_pc   = 1;
+                CTL_LD_R8_D8:    inc_pc   = 1;
+            endcase
+        end
+        EX_Z_TO_MEM: begin
+            z_to_mem = '1;
+            addr_sel = GP16; //always true?
+        end
+        EX_R8_TO_MEM: begin
+            r8_to_mem = '1;
+            addr_sel  = GP16;
         end
         EX_HALT: begin
             to_halt = 1;
