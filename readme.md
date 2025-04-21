@@ -12,6 +12,8 @@ ld r8,d8
 ld r8,[hl]
 ld [hl],r8
 ld [hl],d8
+ld a,[bc]
+ld a,[de]
 inc r8
 dec r8
-HALT
+halt

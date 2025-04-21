@@ -52,6 +52,7 @@ always_comb begin
         CTL_ALU_R8: begin
             execute_sequence = {EX_ALU_R8, EX_IDLE, EX_IDLE, EX_IDLE};
         end
+        CTL_LDPTR_A_R16, //can likely consolidate these
         CTL_LDPTR_R8_HL: begin
             execute_sequence = {EX_MEM_TO_Z, EX_ALU_LD1, EX_IDLE, EX_IDLE};
             last_idx = 1;
@@ -111,6 +112,7 @@ always_comb begin
             mem_to_z = 1;
             case (ctl_op)
                 CTL_LDPTR_R8_HL: addr_sel = GP16;
+                CTL_LDPTR_A_R16: addr_sel = GP16;
                 CTL_LDPTR_HL_D8: inc_pc   = 1;
                 CTL_LD_R8_D8:    inc_pc   = 1;
             endcase

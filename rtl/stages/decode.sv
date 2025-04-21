@@ -57,7 +57,7 @@ always_comb begin
                             r8_sel[0]  = REG_Z;
                             if (alu_rd_sel == REG_Z) begin
                                 ctl_op  = CTL_LDPTR_HL_D8;
-                                r16_sel = R16_HL;
+                                r16_sel.r16 = R16_HL;
                             end
                             else begin
                                 ctl_op = CTL_LD_R8_D8;
@@ -82,11 +82,16 @@ always_comb begin
                             ctl_op = CTL_LDPTR_D16_SP;
                         end
                         else begin //is other 16-bit operation
-                            r16_sel = instr.body.b0.op16.r16;
+                            r16_sel = r16_sel_t'(instr.body.b0.op16.r16);
                             case (instr.body.b0.op16.op)
                                 B0_LD_R16_D16:   ctl_op = CTL_LD_R16_D16;
                                 B0_LDPTR_R16_A:  ctl_op = CTL_LDPTR_R16_A;
-                                B0_LDPTR_A_R16:  ctl_op = CTL_LDPTR_A_R16;
+                                B0_LDPTR_A_R16: begin
+                                    r8_sel[0]  = REG_Z;
+                                    alu_rd_sel = REG_A;
+                                    ctl_op     = CTL_LDPTR_A_R16;
+                                    alu_op     = ALU_LD1;
+                                end
                                 B0_INC_R16:      ctl_op = CTL_INC16;
                                 B0_DEC_R16:      ctl_op = CTL_DEC16;
                                 B0_ADD_HL_R16:   ctl_op = CTL_ALU_HL_R16;
@@ -99,11 +104,11 @@ always_comb begin
                         if (r8_sel[0] == REG_Z) begin //these should be mutually exclusive
                             ctl_op = CTL_LDPTR_R8_HL;
                             alu_op = ALU_LD1;
-                            r16_sel = R16_HL;
+                            r16_sel.r16 = R16_HL;
                         end
                         else if (alu_rd_sel == REG_Z) begin //these should be mutually exclusive
                             ctl_op = CTL_LDPTR_HL_R8;
-                            r16_sel = R16_HL;
+                            r16_sel.r16 = R16_HL;
                         end
                         else begin
                             ctl_op = CTL_LD_R8_R8;
