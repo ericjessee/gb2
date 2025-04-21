@@ -123,6 +123,7 @@ typedef enum logic [7:0] {
     EX_MEM_WZ_TO_Z,
     EX_Z_TO_MEM,
     EX_R8_TO_MEM,
+    EX_A_TO_WZ_MEM,
     EX_HALT
 } ex_state_t;
 

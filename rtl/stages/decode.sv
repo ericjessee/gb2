@@ -164,12 +164,15 @@ always_comb begin
                             jump_cond = instr.body.b3.jp_cond.cond;
                         end
                         //this is dumb also, but all sort of edge cases.
+                        //synthesis should probably trim out the redundant compare bits?
                         else if (full_opcode == OP_LDPTR_C_A)
                             ctl_op = CTL_LDPTR_C_A;
                         else if (full_opcode == OP_LDPTR_A8_A)
                             ctl_op = CTL_LDPTR_A8_A;
-                        else if (full_opcode == OP_LDPTR_A16_A)
-                            ctl_op = CTL_LDPTR_A16_A;
+                        else if (full_opcode == OP_LDPTR_A16_A) begin
+                            ctl_op    = CTL_LDPTR_A16_A;
+                            r8_sel[0] = REG_A;
+                        end
                         else if (full_opcode == OP_LDPTR_A_C)
                             ctl_op = CTL_LDPTR_A_C;
                         else if (full_opcode == OP_LDPTR_A_A8)
