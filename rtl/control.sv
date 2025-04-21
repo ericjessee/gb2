@@ -2,6 +2,8 @@ module control import sm83_pkg::*;(
     input  logic      clk,
     input  logic      rst_n,
     input  ctl_op_t   ctl_op,
+    input  flags_t    flags,
+    input  j_cond_t   jump_cond,
     input  alu_op_t   decoded_alu_op,
     output alu_op_t   alu_op,
 
@@ -22,11 +24,14 @@ module control import sm83_pkg::*;(
 );
 logic last;
 logic to_halt;
-ctl_op_t          curr_op;
-ex_state_t        current_state;
-ex_state_t [0:3]  execute_sequence;
-logic [0:3]       current_idx;
-logic [0:3]       last_idx;
+ctl_op_t         curr_op;
+ex_state_t       current_state;
+ex_state_t [0:3] execute_sequence;
+logic [0:3]      current_idx;
+logic [0:3]      last_idx;
+
+logic jp_cond_true;
+logic jp_taken;
 
 //demux the current state from the sequence vector
 always_comb begin
@@ -83,6 +88,10 @@ always_comb begin
             execute_sequence = {EX_MEM_TO_Z, EX_MEM_TO_W, EX_WZ_TO_PC, EX_IDLE};
             last_idx = 3;
         end
+        CTL_JP_COND: begin
+            execute_sequence = {EX_MEM_TO_Z, EX_MEM_TO_W_COND, EX_WZ_TO_PC, EX_IDLE};
+            last_idx = jp_taken ? 3 : 2;
+        end
         CTL_HALT: begin //not sure about one cycle delay before halt
             execute_sequence = {EX_IDLE, EX_HALT, EX_IDLE, EX_IDLE};
             last_idx = 1;
@@ -119,6 +128,8 @@ always_comb begin
         inc_pc = 1;
     end
 
+    jp_cond_true = '1; //always assumed true unless we are actively doing a compare
+
     case (current_state)
         EX_ALU_R8: begin
             capture_alu_res = 1;
@@ -139,7 +150,8 @@ always_comb begin
                 CTL_LDPTR_HL_D8,
                 CTL_LD_R8_D8,
                 CTL_LDPTR_A_A16,
-                CTL_JP_A16:      inc_pc   = 1;
+                CTL_JP_A16,
+                CTL_JP_COND:     inc_pc   = 1;
                 //load high from ff + c
                 CTL_LDPTRH_A_C:  addr_sel = FF_C;
             endcase
@@ -147,6 +159,16 @@ always_comb begin
         EX_MEM_TO_W: begin
             mem_to_w = 1;
             inc_pc   = 1;
+        end
+        EX_MEM_TO_W_COND: begin
+            mem_to_w = 1;
+            inc_pc   = 1;
+            case (jump_cond)
+                J_NZ: jp_cond_true = !flags.z; 
+                J_Z:  jp_cond_true = flags.z;
+                J_NC: jp_cond_true = !flags.c; 
+                J_C:  jp_cond_true = flags.c;
+            endcase
         end
         EX_MEM_WZ_TO_Z: begin //for when MEM_TO_Z alreay used to load WZ pointer
             mem_to_z = 1;
@@ -165,8 +187,11 @@ always_comb begin
             addr_sel  = WZ;
         end
         EX_WZ_TO_PC: begin
-            wz_to_pc = '1;
-            addr_sel = NONE;
+            if (jp_taken) begin
+                wz_to_pc = '1;
+                addr_sel = NONE;
+            end
+            //else a normal fetch is triggered
         end
         EX_HALT: begin
             to_halt = 1;
@@ -179,6 +204,7 @@ always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         current_idx <= 0;
         halt <= 0;
+        jp_taken <= 1;
     end else begin
         if (to_halt)
             halt <= 1;
@@ -186,6 +212,10 @@ always @(posedge clk or negedge rst_n) begin
             current_idx <= 0;
         else
             current_idx <= current_idx + 1;
+        if (jp_cond_true)
+            jp_taken <= 1;
+        else
+            jp_taken <= 0;
     end
 
 end

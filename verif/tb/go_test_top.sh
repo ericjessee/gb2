@@ -6,7 +6,7 @@
 echo "compile the gb asm file..."
 pushd ../../asm/scripts
 basename=$(basename $1 .gameboy.asm)
-./build.sh $1
+./build.sh $1 #TODO exit if compile fails
 popd
 
 echo "replacing correct mem path..."

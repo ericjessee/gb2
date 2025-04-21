@@ -232,6 +232,8 @@ control ctl(
     .clk(clk),
     .rst_n(rst_n),
     .ctl_op(decode_ctl_op),
+    .flags(r_f),
+    .jump_cond(decode_jump_cond),
     .decoded_alu_op(decode_alu_op),
     .alu_op(ctl_alu_op),
     .addr_sel(addr_sel),
