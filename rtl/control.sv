@@ -16,6 +16,7 @@ module control import sm83_pkg::*;(
     output logic      mem_to_r8,
     output logic      capture_alu_res,
     output logic      r8_to_alu_op1,
+    output logic      alu_op_a_r8,
     output logic      update_flags,
     output logic      r8_to_mem,
     output logic      z_to_mem,
@@ -54,6 +55,9 @@ always_comb begin
         end
         CTL_LD_R8_R8: begin
             execute_sequence = {EX_ALU_LD1, EX_IDLE, EX_IDLE, EX_IDLE};
+        end
+        CTL_ALU_A_R8: begin
+            execute_sequence = {EX_ALU_A_R8, EX_IDLE, EX_IDLE, EX_IDLE};
         end
         CTL_ALU_R8: begin
             execute_sequence = {EX_ALU_R8, EX_IDLE, EX_IDLE, EX_IDLE};
@@ -113,6 +117,7 @@ always_comb begin
     mem_to_r8 = '0;
     capture_alu_res = '0;
     r8_to_alu_op1 = '0;
+    alu_op_a_r8 = '0;
     update_flags = '0;
     r8_to_mem = '0;
     z_to_mem  = '0;
@@ -131,6 +136,10 @@ always_comb begin
     jp_cond_true = '1; //always assumed true unless we are actively doing a compare
 
     case (current_state)
+        EX_ALU_A_R8: begin
+            alu_op_a_r8  = 1;
+            update_flags = 1;
+        end
         EX_ALU_R8: begin
             capture_alu_res = 1;
             r8_to_alu_op1   = 1;
@@ -150,6 +159,7 @@ always_comb begin
                 CTL_LDPTR_HL_D8,
                 CTL_LD_R8_D8,
                 CTL_LDPTR_A_A16,
+                CTL_LDPTR_A16_A,
                 CTL_JP_A16,
                 CTL_JP_COND:     inc_pc   = 1;
                 //load high from ff + c

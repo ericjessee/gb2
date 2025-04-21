@@ -18,6 +18,7 @@ logic mem_to_ir;
 logic mem_to_r8;
 logic capture_alu_res;
 logic r8_to_alu_op1;
+logic alu_op_a_r8;
 logic update_flags;
 logic r8_to_mem;
 logic z_to_mem;
@@ -158,7 +159,12 @@ always_comb begin
         else
             alu_op1 = r_gp8;
     end
-    if (decode_r8_sel[1] == REG_Z)
+    else if (alu_op_a_r8) begin
+        alu_op1 = r_a;
+        alu_op2 = r_gp8;
+    end
+
+    if (decode_r8_sel[1] == REG_Z) //?? is this still valid?
         alu_op2 = r_wz.lsb;
 end
 
@@ -245,6 +251,7 @@ control ctl(
     .mem_to_r8(mem_to_r8),
     .capture_alu_res(capture_alu_res),
     .r8_to_alu_op1(r8_to_alu_op1),
+    .alu_op_a_r8(alu_op_a_r8),
     .update_flags(update_flags),
     .r8_to_mem(r8_to_mem),
     .z_to_mem(z_to_mem),

@@ -1,7 +1,7 @@
 #!/bin/bash
 #my vivado install is in a weird location, so i added this here.
 #i will assume that you have already sourced your settings64.sh, so leaving it commented out.
-#source ~/usbdisk/Xilinx/Vivado/2024.2/settings64.sh
+source ~/usbdisk/Xilinx/Vivado/2024.2/settings64.sh
 
 echo "compile the gb asm file..."
 pushd ../../asm/scripts
@@ -53,5 +53,10 @@ if [ $? -ne 0 ]; then
 fi
 
 # Run the simulation if both commands are successful
-xsim --gui work.sm83_top_tb --view work.sm83_top_tb.wcfg &
+if [ "$2" = "-waves" ]; then
+    xsim --gui work.sm83_top_tb --view work.sm83_top_tb.wcfg &
+else
+    xsim work.sm83_top_tb -R
+fi
+# xsim work.sm83_top_tb -R
 popd

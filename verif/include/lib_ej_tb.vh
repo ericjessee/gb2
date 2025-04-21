@@ -33,6 +33,13 @@ always @(posedge clk or negedge rst_n) begin
     end
 end
 
+always @(posedge clk) begin
+    if (w_wen) begin
+        if (w_addr == 16'hffb0)
+            $write("%s",w_data);
+    end
+end
+
 always #`HALF_PERIOD begin
     clk = ~clk;
 end

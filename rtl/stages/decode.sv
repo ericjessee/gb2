@@ -118,8 +118,8 @@ always_comb begin
                         end
                     end
                     BLOCK_2: begin
-                        ctl_op = CTL_ALU_A;
-                        r8_sel[1] = instr.body.b2.r8;
+                        ctl_op = CTL_ALU_A_R8;
+                        r8_sel[0] = instr.body.b2.r8;
                         alu_op = map_b2_b3_alu_op(instr.body.b2.alu_op);
                     end
                     BLOCK_3: begin

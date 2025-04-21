@@ -8,6 +8,7 @@ data_t r_data;
 data_t w_data;
 addr_t r_addr;
 addr_t w_addr;
+logic  w_wen;
 
 logic halt;
 

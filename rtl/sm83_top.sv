@@ -5,10 +5,9 @@ module sm83_top import sm83_pkg::*;(
     output data_t w_data,
     output addr_t r_addr,
     output addr_t w_addr,
+    output logic  w_wen,
     output logic  halt
 );
-
-logic w_wen;
 
 sm83_core cpu(
     .*

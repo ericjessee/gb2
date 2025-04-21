@@ -116,6 +116,7 @@ typedef enum logic [7:0] { //should be downsized
 
 typedef enum logic [7:0] {
     EX_IDLE,
+    EX_ALU_A_R8,
     EX_ALU_R8,
     EX_ALU_LD1,
     EX_MEM_TO_Z,
