@@ -85,7 +85,9 @@ always_comb begin
                             r16_sel = r16_sel_t'(instr.body.b0.op16.r16);
                             case (instr.body.b0.op16.op)
                                 B0_LD_R16_D16:   ctl_op = CTL_LD_R16_D16;
-                                B0_LDPTR_R16_A:  ctl_op = CTL_LDPTR_R16_A;
+                                B0_LDPTR_R16_A: begin
+                                    ctl_op = CTL_LDPTR_R16_A;
+                                end
                                 B0_LDPTR_A_R16: begin
                                     r8_sel[0]  = REG_Z;
                                     alu_rd_sel = REG_A;

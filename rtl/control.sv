@@ -57,6 +57,7 @@ always_comb begin
             execute_sequence = {EX_MEM_TO_Z, EX_ALU_LD1, EX_IDLE, EX_IDLE};
             last_idx = 1;
         end
+        CTL_LDPTR_R16_A,
         CTL_LDPTR_HL_R8: begin
             execute_sequence = {EX_R8_TO_MEM, EX_IDLE, EX_IDLE, EX_IDLE};
             last_idx = 1;
