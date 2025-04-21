@@ -102,8 +102,8 @@ typedef enum logic [7:0] { //should be downsized
     CTL_LDPTR_R16_D8,
     CTL_LDPTR_R8_R16,
     CTL_LDPTR_D16_SP,
-    CTL_LDPTR_C_A,
-    CTL_LDPTR_A_C,
+    CTL_LDPTRH_C_A,
+    CTL_LDPTRH_A_C,
     CTL_LDPTR_A8_A,
     CTL_LDPTR_A_A8,
     CTL_LDPTR_A16_A,
@@ -132,7 +132,8 @@ typedef enum logic [2:0] {
     PC,
     SP,
     GP16,
-    WZ
+    WZ,
+    FF_C
 } addr_sel_t;
 
 typedef enum logic [1:0] { 

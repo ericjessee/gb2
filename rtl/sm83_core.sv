@@ -154,6 +154,8 @@ always_comb begin
         else
             alu_op1 = r_gp8;
     end
+    if (decode_r8_sel[1] == REG_Z)
+        alu_op2 = r_wz.lsb;
 end
 
 alu alu_0(
@@ -189,6 +191,7 @@ always_comb begin
         SP:   {r_addr, w_addr} = {sp, sp};
         GP16: {r_addr, w_addr} = {addr_t'(r_gp16), addr_t'(r_gp16)};
         WZ:   {r_addr, w_addr} = {addr_t'(r_wz), addr_t'(r_wz)};
+        FF_C: {r_addr, w_addr} = {addr_t'({8'hff, r_gp8}), addr_t'({8'hff, r_gp8})};
     endcase
 end
 

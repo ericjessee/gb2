@@ -16,6 +16,9 @@ ld a,[bc] \
 ld a,[de] \
 ld [bc],a \
 ld [de],a \
+ld a,[n16] \
+ld [n16],a \
+ldh a,[c] \
 inc r8 \
 dec r8 \
 halt

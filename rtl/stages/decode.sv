@@ -166,15 +166,19 @@ always_comb begin
                         //this is dumb also, but all sort of edge cases.
                         //synthesis should probably trim out the redundant compare bits?
                         else if (full_opcode == OP_LDPTR_C_A)
-                            ctl_op = CTL_LDPTR_C_A;
+                            ctl_op = CTL_LDPTRH_C_A;
                         else if (full_opcode == OP_LDPTR_A8_A)
                             ctl_op = CTL_LDPTR_A8_A;
                         else if (full_opcode == OP_LDPTR_A16_A) begin
                             ctl_op    = CTL_LDPTR_A16_A;
                             r8_sel[0] = REG_A;
                         end
-                        else if (full_opcode == OP_LDPTR_A_C)
-                            ctl_op = CTL_LDPTR_A_C;
+                        else if (full_opcode == OP_LDPTR_A_C) begin
+                            ctl_op = CTL_LDPTRH_A_C;
+                            alu_op = ALU_LD2;
+                            r8_sel[0] = REG_C;
+                            r8_sel[1] = REG_Z; //??
+                        end
                         else if (full_opcode == OP_LDPTR_A_A8)
                             ctl_op = CTL_LDPTR_A_A8;
                         else if (full_opcode == OP_LDPTR_A_A16) begin
