@@ -119,10 +119,12 @@ typedef enum logic [7:0] {
     EX_ALU_R8,
     EX_ALU_LD1,
     EX_MEM_TO_Z,
+    EX_MEM_TO_W,
+    EX_MEM_WZ_TO_Z,
     EX_Z_TO_MEM,
     EX_R8_TO_MEM,
     EX_HALT
-} ctl_state_t;
+} ex_state_t;
 
 typedef enum logic [2:0] {
     NONE,

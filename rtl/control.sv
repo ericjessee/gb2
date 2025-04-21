@@ -22,8 +22,8 @@ module control import sm83_pkg::*;(
 logic last;
 logic to_halt;
 ctl_op_t          curr_op;
-ctl_state_t       current_state;
-ctl_state_t [0:3] execute_sequence;
+ex_state_t        current_state;
+ex_state_t [0:3]  execute_sequence;
 logic [0:3]       current_idx;
 logic [0:3]       last_idx;
 
@@ -34,7 +34,7 @@ always_comb begin
         1: current_state = execute_sequence[1];
         2: current_state = execute_sequence[2];
         3: current_state = execute_sequence[3];
-        default: current_state = ctl_state_t'('b111);
+        default: current_state = ex_state_t'('b111);
     endcase
 end
 
@@ -57,7 +57,7 @@ always_comb begin
             execute_sequence = {EX_MEM_TO_Z, EX_ALU_LD1, EX_IDLE, EX_IDLE};
             last_idx = 1;
         end
-        CTL_LDPTR_R16_A,
+        CTL_LDPTR_R16_A, //can likely consolidate these
         CTL_LDPTR_HL_R8: begin
             execute_sequence = {EX_R8_TO_MEM, EX_IDLE, EX_IDLE, EX_IDLE};
             last_idx = 1;
@@ -66,9 +66,13 @@ always_comb begin
             execute_sequence = {EX_MEM_TO_Z, EX_Z_TO_MEM, EX_IDLE, EX_IDLE};
             last_idx = 2;
         end
+        CTL_LDPTR_A_A16: begin
+            execute_sequence = {EX_MEM_TO_Z, EX_MEM_TO_W, EX_MEM_WZ_TO_Z, EX_ALU_LD1};
+            last_idx = 3;
+        end
         CTL_HALT: begin //not sure about one cycle delay before halt
             execute_sequence = {EX_IDLE, EX_HALT, EX_IDLE, EX_IDLE};
-            last_idx = 1; //sequence becomes don't care
+            last_idx = 1;
         end
         default: begin
             execute_sequence  = {EX_IDLE, EX_IDLE, EX_IDLE, EX_IDLE};
@@ -80,6 +84,8 @@ always_comb begin
     //output logic
     alu_op = decoded_alu_op;
     inc_pc = '0;
+    mem_to_z = '0;
+    mem_to_w = '0;
     mem_to_ir = '0;
     mem_to_r8 = '0;
     capture_alu_res = '0;
@@ -112,11 +118,22 @@ always_comb begin
         EX_MEM_TO_Z: begin
             mem_to_z = 1;
             case (ctl_op)
-                CTL_LDPTR_R8_HL: addr_sel = GP16;
+                //loading z indirect from 16-bit reg
+                CTL_LDPTR_R8_HL,
                 CTL_LDPTR_A_R16: addr_sel = GP16;
-                CTL_LDPTR_HL_D8: inc_pc   = 1;
-                CTL_LD_R8_D8:    inc_pc   = 1;
+                //loading z from 8-bit immediate
+                CTL_LDPTR_HL_D8,
+                CTL_LD_R8_D8,
+                CTL_LDPTR_A_A16: inc_pc   = 1;
             endcase
+        end
+        EX_MEM_TO_W: begin
+            mem_to_w = 1;
+            inc_pc   = 1;
+        end
+        EX_MEM_WZ_TO_Z: begin //for when MEM_TO_Z alreay used to load WZ pointer
+            mem_to_z = 1;
+            addr_sel = WZ;
         end
         EX_Z_TO_MEM: begin
             z_to_mem = '1;

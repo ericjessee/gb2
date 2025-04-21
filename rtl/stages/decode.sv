@@ -153,11 +153,13 @@ always_comb begin
                             ctl_op = CTL_RET_COND;
                             jump_cond = instr.body.b3.jp_cond.cond;
                         end
-                        else if (instr.body.b3.jp_cond.id2 == 3'b010) begin
+                        else if ((instr.body.b3.jp_cond.const0 == 0) 
+                                  && (instr.body.b3.jp_cond.id2 == 3'b010)) begin
                             ctl_op = CTL_JP_COND;
                             jump_cond = instr.body.b3.jp_cond.cond;
                         end
-                        else if (instr.body.b3.jp_cond.id2 == 3'b100) begin
+                        else if ((instr.body.b3.jp_cond.const0 == 0)
+                                  && instr.body.b3.jp_cond.id2 == 3'b100) begin
                             ctl_op = CTL_CALL_COND_A16;
                             jump_cond = instr.body.b3.jp_cond.cond;
                         end
@@ -172,8 +174,12 @@ always_comb begin
                             ctl_op = CTL_LDPTR_A_C;
                         else if (full_opcode == OP_LDPTR_A_A8)
                             ctl_op = CTL_LDPTR_A_A8;
-                        else if (full_opcode == OP_LDPTR_A_A16)
-                            ctl_op = CTL_LDPTR_A_A16;
+                        else if (full_opcode == OP_LDPTR_A_A16) begin
+                            ctl_op     = CTL_LDPTR_A_A16;
+                            alu_op     = ALU_LD1;
+                            r8_sel[0]  = REG_Z;
+                            alu_rd_sel = REG_A;
+                        end
                         else if (full_opcode == OP_ADD_SP_D8)
                             ctl_op = CTL_ADD_SP_D8;
                         else if (full_opcode == OP_LD_HL_SP_S8)
