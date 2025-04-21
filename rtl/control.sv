@@ -7,6 +7,7 @@ module control import sm83_pkg::*;(
 
     output addr_sel_t addr_sel,
     output logic      inc_pc,
+    output logic      wz_to_pc,
     output logic      mem_to_z,
     output logic      mem_to_w,
     output logic      mem_to_ir,
@@ -78,6 +79,10 @@ always_comb begin
             execute_sequence = {EX_MEM_TO_Z, EX_ALU_LD1, EX_IDLE, EX_IDLE};
             last_idx = 1;
         end
+        CTL_JP_A16: begin
+            execute_sequence = {EX_MEM_TO_Z, EX_MEM_TO_W, EX_WZ_TO_PC, EX_IDLE};
+            last_idx = 3;
+        end
         CTL_HALT: begin //not sure about one cycle delay before halt
             execute_sequence = {EX_IDLE, EX_HALT, EX_IDLE, EX_IDLE};
             last_idx = 1;
@@ -92,6 +97,7 @@ always_comb begin
     //output logic
     alu_op = decoded_alu_op;
     inc_pc = '0;
+    wz_to_pc = '0;
     mem_to_z = '0;
     mem_to_w = '0;
     mem_to_ir = '0;
@@ -125,14 +131,16 @@ always_comb begin
         end
         EX_MEM_TO_Z: begin
             mem_to_z = 1;
-            case (ctl_op)
+            case (ctl_op) //maybe could be individual states for clarity
                 //loading z indirect from 16-bit reg
                 CTL_LDPTR_R8_HL,
                 CTL_LDPTR_A_R16: addr_sel = GP16;
                 //loading z from 8-bit immediate
                 CTL_LDPTR_HL_D8,
                 CTL_LD_R8_D8,
-                CTL_LDPTR_A_A16: inc_pc   = 1;
+                CTL_LDPTR_A_A16,
+                CTL_JP_A16:      inc_pc   = 1;
+                //load high from ff + c
                 CTL_LDPTRH_A_C:  addr_sel = FF_C;
             endcase
         end
@@ -155,6 +163,10 @@ always_comb begin
         EX_A_TO_WZ_MEM: begin
             r8_to_mem = '1;
             addr_sel  = WZ;
+        end
+        EX_WZ_TO_PC: begin
+            wz_to_pc = '1;
+            addr_sel = NONE;
         end
         EX_HALT: begin
             to_halt = 1;

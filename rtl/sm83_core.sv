@@ -110,7 +110,11 @@ always_comb begin
     end
 
     if (inc_pc) begin
-        new_pc = idu_out;
+        new_pc         = idu_out;
+        reg_wen_vec.pc = 1;
+    end
+    else if (wz_to_pc) begin
+        new_pc         = r_wz;
         reg_wen_vec.pc = 1;
     end
 
@@ -232,6 +236,7 @@ control ctl(
     .alu_op(ctl_alu_op),
     .addr_sel(addr_sel),
     .inc_pc(inc_pc),
+    .wz_to_pc(wz_to_pc),
     .mem_to_z(mem_to_z),
     .mem_to_w(mem_to_w),
     .mem_to_ir(mem_to_ir),
@@ -241,6 +246,7 @@ control ctl(
     .update_flags(update_flags),
     .r8_to_mem(r8_to_mem),
     .z_to_mem(z_to_mem),
+    
     .halt(halt)
 );
 
