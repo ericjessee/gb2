@@ -1,5 +1,4 @@
-def success_byte equ  $ffa0
-def print_addr   equ  $ffb0
+include "global_defines.inc"
 
 SECTION "main", ROM0[$0]
     jp print_str

@@ -12,6 +12,9 @@ module sm83_core import sm83_pkg::*;(
 //control signals
 alu_op_t ctl_alu_op;
 logic inc_pc;
+logic inc_r16;
+logic dec_r16;
+logic wz_to_pc;
 logic mem_to_z;
 logic mem_to_w;
 logic mem_to_ir;
@@ -22,6 +25,9 @@ logic alu_op_a_r8;
 logic update_flags;
 logic r8_to_mem;
 logic z_to_mem;
+logic pch_to_mem;
+logic pcl_to_mem;
+logic wz_to_r16;
 
 //WZ register
 r16_t r_wz;
@@ -110,6 +116,7 @@ always_comb begin
         reg_wen_vec.ir = 1;
     end
 
+    new_pc = '0;
     if (inc_pc) begin
         new_pc         = idu_out;
         reg_wen_vec.pc = 1;
@@ -117,6 +124,27 @@ always_comb begin
     else if (wz_to_pc) begin
         new_pc         = r_wz;
         reg_wen_vec.pc = 1;
+    end
+
+    if (inc_r16 || dec_r16) begin
+        if (decode_r16_sel == R16_SP) begin
+            new_sp         = idu_out;
+            reg_wen_vec.sp = 1;
+        end else begin
+            new_gp16         = idu_out;
+            reg_wen_vec.gp16 = 1;
+        end
+    end
+    
+    new_gp16 = '0;
+    if (wz_to_r16) begin
+        if (decode_r16_sel == R16_SP) begin
+            reg_wen_vec.sp = 1;
+            new_sp = r_wz;
+        end else begin
+            reg_wen_vec.gp16 = 1;
+            new_gp16 = r_wz;
+        end
     end
 
 end
@@ -130,7 +158,7 @@ register_file rf(
     .w_a(new_a),
     .w_f(new_f),
     .w_sel8_gp(decode_alu_rd_sel),
-    .w_sel16_gp(),
+    .w_sel16_gp(decode_r16_sel.r16),
     .w8_gp(new_gp8),
     .w16_gp(new_gp16),
     .w_pc(new_pc),
@@ -179,17 +207,31 @@ alu alu_0(
 
 //idu input muxing
 always_comb begin 
-    idu_in = '0;
+    // idu_in = '0;
     idu_inc_ndec = '1;
     if (inc_pc) begin
         idu_inc_ndec = 1;
-        idu_in       = pc;
+        // idu_in       = pc;
+    end
+    else if (inc_r16) begin 
+        idu_inc_ndec = 1;
+        // if (decode_r16_sel == R16_SP)
+        //     idu_in = sp;
+        // else
+        //     idu_in = r_gp16;
+    end
+    else if (dec_r16) begin
+        idu_inc_ndec = 0;
+        // if (decode_r16_sel == R16_SP)
+        //     idu_in = sp;
+        // else
+        //     idu_in = r_gp16;
     end
 end
 
 idu idu_0(
     .inc_ndec(idu_inc_ndec),
-    .r16_in(idu_in),
+    .r16_in(r_addr),
     .r16_out(idu_out)
 );
 
@@ -219,6 +261,14 @@ always_comb begin
         w_wen = '1;
         w_data = r_wz.lsb;
     end
+    else if (pch_to_mem) begin
+        w_wen = '1;
+        w_data = pc.msb;
+    end
+    else if (pcl_to_mem) begin
+        w_wen = '1;
+        w_data = pc.lsb;
+    end
 end
 
 decode decode_0 (
@@ -244,6 +294,8 @@ control ctl(
     .alu_op(ctl_alu_op),
     .addr_sel(addr_sel),
     .inc_pc(inc_pc),
+    .inc_r16(inc_r16),
+    .dec_r16(dec_r16),
     .wz_to_pc(wz_to_pc),
     .mem_to_z(mem_to_z),
     .mem_to_w(mem_to_w),
@@ -255,7 +307,9 @@ control ctl(
     .update_flags(update_flags),
     .r8_to_mem(r8_to_mem),
     .z_to_mem(z_to_mem),
-    
+    .pch_to_mem(pch_to_mem),
+    .pcl_to_mem(pcl_to_mem),
+    .wz_to_r16(wz_to_r16),
     .halt(halt)
 );
 

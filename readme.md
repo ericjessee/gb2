@@ -19,6 +19,10 @@ ld [de],a \
 ld a,[n16] \
 ld [n16],a \
 ldh a,[c] \
+jp a16 \
+jp cc, a16 \
+call a16 \
+cp r8 \
 inc r8 \
 dec r8 \
 halt

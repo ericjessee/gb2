@@ -5,7 +5,7 @@ fname=$(basename $1 .gameboy.asm)
 mkdir -p build_dir
 pushd build_dir
 echo "assembling..."
-rgbasm -o $fname.o $1
+rgbasm -i ../../tests/include -i ../../tests/regression/tests -o $fname.o $1
 echo "linking..."
 #the -x option removes padding
 rgblink -o $fname.gb $fname.o

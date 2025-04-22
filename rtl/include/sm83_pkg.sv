@@ -114,7 +114,7 @@ typedef enum logic [7:0] { //should be downsized
     CTL_PUSH_STACK
 } ctl_op_t;
 
-typedef enum logic [7:0] {
+typedef enum logic [7:0] { //should size this smaller
     EX_IDLE,
     EX_ALU_A_R8,
     EX_ALU_R8,
@@ -127,6 +127,11 @@ typedef enum logic [7:0] {
     EX_R8_TO_MEM,
     EX_A_TO_WZ_MEM,
     EX_WZ_TO_PC,
+    EX_WZ_TO_R16,
+    EX_INC_R16,
+    EX_DEC_R16,
+    EX_PCH_TO_MEM,
+    EX_PCL_TO_MEM,
     EX_HALT
 } ex_state_t;
 

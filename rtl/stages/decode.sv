@@ -84,7 +84,10 @@ always_comb begin
                         else begin //is other 16-bit operation
                             r16_sel = r16_sel_t'(instr.body.b0.op16.r16);
                             case (instr.body.b0.op16.op)
-                                B0_LD_R16_D16:   ctl_op = CTL_LD_R16_D16;
+                                B0_LD_R16_D16: begin
+                                    ctl_op = CTL_LD_R16_D16;
+                                    r8_sel[0] = REG_Z;
+                                end
                                 B0_LDPTR_R16_A: begin
                                     ctl_op = CTL_LDPTR_R16_A;
                                 end
@@ -143,8 +146,10 @@ always_comb begin
                             ctl_op = CTL_JP_A16;
                         else if (full_opcode == OP_JP_HL)
                             ctl_op = CTL_JP_HL;
-                        else if (full_opcode == OP_CALL_A16)
+                        else if (full_opcode == OP_CALL_A16) begin
                             ctl_op = CTL_CALL_A16;
+                            r16_sel.r16 = R16_SP;
+                        end
                         else if (instr.body.b3.rst.const111 == 3'b111) begin
                             ctl_op = CTL_RST;
                             rst_tgt = instr.body.b3.rst.target;
