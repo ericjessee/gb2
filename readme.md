@@ -1,4 +1,4 @@
-second attempt at a verilog model of an sm83 cpu, with lessons learned from various projecsts in the meantime.
+second attempt at a verilog model of an sm83 cpu, with lessons learned from various projects in the meantime.
 
 references:\
 https://gekkio.fi/files/gb-docs/gbctr.pdf \
