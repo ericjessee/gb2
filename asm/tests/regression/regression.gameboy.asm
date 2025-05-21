@@ -1,7 +1,7 @@
 include "global_defines.inc"
 
 SECTION "main", ROM0[$0]
-    jp print_str
+    call print_str
 test:
     ;preload some data into ram for reading
     ld h,$ff
@@ -12,10 +12,7 @@ test:
     ld l,$a0
     ld [hl],$ff
     ;run the tests
-test1:
-    include "../tests/regression/tests/regr_cp_r8.gameboy.asm"
-test2:
-    halt
+    
 
 section "subroutines", ROM0[$1000]
 print_str:
@@ -30,10 +27,11 @@ str_loop:
     ld a,[hl]
     dec b
     jp nz,str_loop
-    jp test
+    ret
+
 
 section "string_1", ROM0[$2000]
-    db $0c ;string length
-    db "hello world\n"
+    db 20 ;string length
+    db "starting regression\n"
     
 

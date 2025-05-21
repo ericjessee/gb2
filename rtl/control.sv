@@ -112,6 +112,10 @@ always_comb begin
             execute_sequence = {EX_MEM_TO_Z, EX_MEM_TO_W, EX_DEC_R16, EX_PCH_TO_MEM, EX_PCL_TO_MEM, EX_IDLE};
             last_idx = 5;
         end
+        CTL_CALL_COND_A16: begin
+            execute_sequence = {EX_MEM_TO_Z, EX_MEM_TO_W_COND, EX_DEC_R16, EX_PCH_TO_MEM, EX_PCL_TO_MEM, EX_IDLE};
+            last_idx = jp_taken ? 5 : 2;
+        end
         CTL_RET: begin
             execute_sequence = {EX_MEM_TO_Z, EX_MEM_TO_W, EX_WZ_TO_PC, {3{EX_IDLE}}};
             last_idx = 3;
@@ -203,7 +207,10 @@ always_comb begin
         end
         EX_MEM_TO_W_COND: begin
             mem_to_w = 1;
-            inc_pc   = 1;
+            case (ctl_op)
+                CTL_RET: {inc_r16, addr_sel} = {1'b1, SP};
+                default: inc_pc    = 1;
+            endcase
             case (jump_cond)
                 J_NZ: jp_cond_true = !flags.z; 
                 J_Z:  jp_cond_true = flags.z;

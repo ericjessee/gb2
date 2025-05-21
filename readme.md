@@ -23,6 +23,7 @@ jp a16 \
 jp cc, a16 \
 call a16 \
 cp r8 \
+add a, r8 \
 inc r8 \
 dec r8 \
 halt

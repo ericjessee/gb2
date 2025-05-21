@@ -39,6 +39,7 @@ always_comb begin
     out_flags   = '0;
     
     //used for half carry flags
+    /* verilator lint_off WIDTHEXPAND */
     case(alu_op)
         ALU_NOP: ;
         ALU_LD1: begin
@@ -143,6 +144,7 @@ always_comb begin
                 full_result = (!in_flags.n) ? (op1 + 8'h60) : (op1 - 8'h60);
         end 
     endcase
+    /* verilator lint_on WIDTHEXPAND */
 
 
     result = full_result[7:0];

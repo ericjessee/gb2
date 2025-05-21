@@ -9,3 +9,4 @@ nojp:
     dec a
     ld [hl],a
 done1:
+    halt

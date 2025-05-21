@@ -211,21 +211,12 @@ always_comb begin
     idu_inc_ndec = '1;
     if (inc_pc) begin
         idu_inc_ndec = 1;
-        // idu_in       = pc;
     end
     else if (inc_r16) begin 
         idu_inc_ndec = 1;
-        // if (decode_r16_sel == R16_SP)
-        //     idu_in = sp;
-        // else
-        //     idu_in = r_gp16;
     end
     else if (dec_r16) begin
         idu_inc_ndec = 0;
-        // if (decode_r16_sel == R16_SP)
-        //     idu_in = sp;
-        // else
-        //     idu_in = r_gp16;
     end
 end
 
@@ -236,14 +227,16 @@ idu idu_0(
 );
 
 //address bus output demuxing
+//memory is single port
+assign w_addr = r_addr;
 always_comb begin
     r_addr = 64; //chosen at random for debug
     case (addr_sel) //w_addr may not be needed for some of these
-        PC:   {r_addr, w_addr} = {pc, pc};
-        SP:   {r_addr, w_addr} = {sp, sp};
-        GP16: {r_addr, w_addr} = {addr_t'(r_gp16), addr_t'(r_gp16)};
-        WZ:   {r_addr, w_addr} = {addr_t'(r_wz), addr_t'(r_wz)};
-        FF_C: {r_addr, w_addr} = {addr_t'({8'hff, r_gp8}), addr_t'({8'hff, r_gp8})};
+        PC:   r_addr = pc;
+        SP:   r_addr = sp;
+        GP16: r_addr = addr_t'(r_gp16);
+        WZ:   r_addr = addr_t'(r_wz);
+        FF_C: r_addr = addr_t'({8'hff, r_gp8});
     endcase
 end
 
