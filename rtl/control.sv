@@ -196,6 +196,7 @@ always_comb begin
                 CTL_RET:          {inc_r16, addr_sel} = {1'b1, SP};
                 //load high from ff + c
                 CTL_LDPTRH_A_C:  addr_sel = FF_C;
+                default: addr_sel = GP16;
             endcase
         end
         EX_MEM_TO_W: begin
@@ -246,13 +247,15 @@ always_comb begin
         end
         EX_INC_R16: begin
             case (ctl_op)
-               CTL_CALL_A16: addr_sel = SP; 
+               CTL_CALL_A16: addr_sel = SP;
+               default: addr_sel = SP;
             endcase
             inc_r16 = '1;
         end
         EX_DEC_R16: begin
             case (ctl_op)
-               CTL_CALL_A16: addr_sel = SP; 
+               CTL_CALL_A16: addr_sel = SP;
+               default: addr_sel = SP;
             endcase
             dec_r16 = '1;
         end
@@ -268,6 +271,8 @@ always_comb begin
         end
         EX_HALT: begin
             to_halt = 1;
+        end
+        default: begin
         end
     endcase
 

@@ -230,19 +230,20 @@ idu idu_0(
 //memory is single port
 assign w_addr = r_addr;
 always_comb begin
-    r_addr = 64; //chosen at random for debug
     case (addr_sel) //w_addr may not be needed for some of these
         PC:   r_addr = pc;
         SP:   r_addr = sp;
         GP16: r_addr = addr_t'(r_gp16);
         WZ:   r_addr = addr_t'(r_wz);
         FF_C: r_addr = addr_t'({8'hff, r_gp8});
+        default: r_addr = 64; //chosen at random for debug
     endcase
 end
 
 //data bus output and write enable
 always_comb begin
     w_wen = '0;
+    w_data = '0;
     if (r8_to_mem) begin
         w_wen = '1;
         if (decode_r8_sel[0] == REG_A)

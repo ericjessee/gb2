@@ -69,6 +69,7 @@ begin
         OP_LD_A_H: d_ld_r8_r8 = {REG_A, REG_H};
         OP_LD_A_L: d_ld_r8_r8 = {REG_A, REG_L};
         OP_LD_A_A: d_ld_r8_r8 = {REG_A, REG_A};
+        default:  d_ld_r8_r8 = {REG_A, REG_A};
     endcase
 end
 endfunction
@@ -104,16 +105,9 @@ begin
             OP_SBC_A_C: d_alu_a_r8[1] = REG_C;
             OP_SBC_A_D: d_alu_a_r8[1] = REG_D;
             OP_SBC_A_E: d_alu_a_r8[1] = REG_E;
-            OP_SBC_A_H: d_alu_a_r8[1] = REG_H;
-            OP_SBC_A_L: d_alu_a_r8[1] = REG_L;             
-            OP_SBC_A_A: d_alu_a_r8[1] = REG_A;
-            OP_SBC_A_B: d_alu_a_r8[1] = REG_B;  
-            OP_SBC_A_C: d_alu_a_r8[1] = REG_C;  
-            OP_SBC_A_D: d_alu_a_r8[1] = REG_D;  
-            OP_SBC_A_E: d_alu_a_r8[1] = REG_E;  
-            OP_SBC_A_H: d_alu_a_r8[1] = REG_H;  
+            OP_SBC_A_H: d_alu_a_r8[1] = REG_H;             
+            OP_SBC_A_A: d_alu_a_r8[1] = REG_A;  
             OP_SBC_A_L: d_alu_a_r8[1] = REG_L;  
-            OP_SBC_A_A: d_alu_a_r8[1] = REG_A;
             OP_AND_A_B: d_alu_a_r8[1] = REG_B; 
             OP_AND_A_C: d_alu_a_r8[1] = REG_C; 
             OP_AND_A_D: d_alu_a_r8[1] = REG_D; 
@@ -142,6 +136,7 @@ begin
             OP_CP_A_H:  d_alu_a_r8[1] = REG_H;
             OP_CP_A_L:  d_alu_a_r8[1] = REG_L;
             OP_CP_A_A:  d_alu_a_r8[1] = REG_A;
+            default: d_alu_a_r8[1] = REG_A;
     endcase
 end
 endfunction

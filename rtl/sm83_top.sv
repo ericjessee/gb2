@@ -1,3 +1,5 @@
+`include "sm83_pkg.sv"
+`include "mock_mem_pathed.sv"
 module sm83_top import sm83_pkg::*;(
     input         clk,
     input         rst_n,

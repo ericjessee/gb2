@@ -100,6 +100,7 @@ always_comb begin
                                 B0_INC_R16:      ctl_op = CTL_INC16;
                                 B0_DEC_R16:      ctl_op = CTL_DEC16;
                                 B0_ADD_HL_R16:   ctl_op = CTL_ALU_HL_R16;
+                                default: ctl_op = CTL_NOP;
                             endcase
                         end
                     end
@@ -209,7 +210,7 @@ always_comb begin
         1: begin
             //this will be the second byte in the 16-bit instr
             ctl_op = CTL_ALU_R8;
-            r8_sel = instr.body.cb.alu.r8;
+            r8_sel[0] = instr.body.cb.alu.r8;
             if (instr.block == 2'b00) begin
                 case (instr.body.cb.alu.alu_op)
                     RLC:  alu_op = ALU_RLC; 
@@ -226,8 +227,10 @@ always_comb begin
                     2'b01: bit_op_base = ALU_BIT_0;
                     2'b10: bit_op_base = ALU_RES_0;
                     2'b11: bit_op_base = ALU_SET_0;
+                    default: bit_op_base = ALU_BIT_0;
                 endcase
-                alu_op = alu_op_t'(bit_op_base + instr.body.cb.bitop.bit_idx);
+                //this is ridiculous, but verilator refuses to accept otherwise
+                alu_op = alu_op_t'(bit_op_base + alu_op_t'(instr.body.cb.bitop.bit_idx));
             end
         end
 

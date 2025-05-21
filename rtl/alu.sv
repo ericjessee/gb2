@@ -18,6 +18,7 @@ function bit_mask(alu_op_t alu_op);
             ALU_BIT_5, ALU_RES_5, ALU_SET_5: bit_mask = (1 << 5);
             ALU_BIT_6, ALU_RES_6, ALU_SET_6: bit_mask = (1 << 6);
             ALU_BIT_7, ALU_RES_7, ALU_SET_7: bit_mask = (1 << 7);
+            default: bit_mask = (1 << 0);
         endcase
     end
 endfunction
@@ -34,14 +35,11 @@ always_comb begin
 end
 
 always_comb begin
-
-    full_result = '0;
-    out_flags   = '0;
-    
     //used for half carry flags
+    full_result = '0;
+    ignore_carry = '0;
+    unique case(alu_op)
     /* verilator lint_off WIDTHEXPAND */
-    case(alu_op)
-        ALU_NOP: ;
         ALU_LD1: begin
             full_result[7:0] = op1;
         end
@@ -137,14 +135,19 @@ always_comb begin
         ALU_CPL: begin
             full_result = {1'b0, ~op1};
         end
-        ALU_DAA: begin //what the is this for?
+        ALU_DAA: begin //what the hell is this for?
             if ((op1[3:0] > 4'd9) || in_flags.h)
                 full_result = (!in_flags.n) ? (op1 + 8'h6)  : (op1 - 8'h6);
             else if (op1[7:4] > 4'd9 || in_flags.c)
                 full_result = (!in_flags.n) ? (op1 + 8'h60) : (op1 - 8'h60);
-        end 
-    endcase
+        end
+        default: begin
+            full_result = '0;
+            out_flags   = '0;
+        end
     /* verilator lint_on WIDTHEXPAND */
+    endcase
+    
 
 
     result = full_result[7:0];
