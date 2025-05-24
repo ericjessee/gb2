@@ -1,5 +1,5 @@
 // cpp testbench for verilated code
-// heavily based on ECE493 example code
+// based on ECE493 example code
 
 #include <cstdio>
 #include <cmath>
@@ -30,14 +30,23 @@ class SM83_Top_TB {
         }
 
         ~SM83_Top_TB() {
-            //sm83_top->final();
+            //sm83_top->final(); //i think only needed if final statement is present?
             vtrace->flush();
             vtrace->close();
             delete sm83_top;
             delete vtrace;
         }
 
+        void check_print(){
+            if (sm83_top->w_wen) {
+                if (sm83_top->w_addr == 0xffb0){
+                    printf("%c", sm83_top->w_data);
+                }
+            }
+        }
+
         void tick() {
+            check_print();
             // Toggle clock edge once
             sm83_top->clk = !sm83_top->clk;
             sm83_top->eval();
@@ -59,11 +68,14 @@ class SM83_Top_TB {
             }
         }
 
+
+
         void initial() {
             sm83_top->rst_n = 0;
             wait_cycles(4);
             sm83_top->rst_n = 1;
-            wait_cycles(100);
+            while (!sm83_top->halt) 
+                wait_cycles(1);
         }
 
     private: 

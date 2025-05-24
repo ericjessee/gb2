@@ -1,9 +1,9 @@
+#!/bin/bash
 
 relpath_rtl=../../../rtl
 relpath_rtl_inc=$relpath_rtl/include
 relpath_verif=../..
 relpath_verif_include=$relpath_verif/include
-
 
 echo "compile the gb asm file..."
 pushd ../../asm/scripts
@@ -24,6 +24,7 @@ verilator --trace +incdir+$relpath_rtl \
                   +incdir+$relpath_verif \
                   +incdir+$relpath_verif/tb \
                   +incdir+$relpath_verif_include \
+                  -DVERILATOR_SIM \
                   --build --exe --cc --trace --timing \
                   -Wno-ASCRANGE \
                   sm83_top.sv \
