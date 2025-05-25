@@ -15,9 +15,28 @@ sm83_core cpu(
     .*
 );
 
-mock_mem mem(
+mock_mem ROM0(
     .*,
-    .wen(w_wen)
+    .wen('0)
 );
+
+addr_t wram0_local_addr;
+logic wram0_wen;
+always_comb begin
+    wram0_local_addr = r_addr - 16'hc000; //r and w are tied together
+    wram0_wen = w_wen & (r_addr >= 16'hc000);
+end
+
+mock_mem #(
+    .IS_ROM(0)
+) WRAM0(
+    .*,
+    .wen(wram0_wen)
+);
+
+`ifdef VERILATOR_SIM
+logic [15:0] addr_concat;
+assign addr_concat = 16'(r_addr);
+`endif
 
 endmodule

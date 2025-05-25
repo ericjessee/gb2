@@ -1,9 +1,9 @@
 SECTION "main", ROM0[$0]
-    ld d,$00
-    ld e,$20
-    ld a,$be
+    ld d,$c0
+    ld e,$00
+    ld a,$ca
     ld [de],a
-    ld a,$ef
-    ld e,$21
+    ld a,$fe
+    inc e
     ld [de],a
     halt

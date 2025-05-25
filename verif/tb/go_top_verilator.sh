@@ -25,6 +25,8 @@ verilator --trace +incdir+$relpath_rtl \
                   +incdir+$relpath_verif/tb \
                   +incdir+$relpath_verif_include \
                   -DVERILATOR_SIM \
+                  --trace-structs \
+                  --trace-max-array 256 \
                   --build --exe --cc --trace --timing \
                   -Wno-ASCRANGE \
                   sm83_top.sv \

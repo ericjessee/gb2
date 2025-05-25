@@ -8,7 +8,7 @@ echo "assembling..."
 rgbasm -i ../../tests/include -i ../../tests/regression/tests -o $fname.o $1
 echo "linking..."
 #the -x option removes padding
-rgblink -o $fname.gb $fname.o
+rgblink -x -o $fname.gb $fname.o
 echo "created build_dir/$fname.gb. converting to .mem..."
 rm -f $fname.mem
 python3 ../convert_to_mem.py $fname.gb $fname.mem
