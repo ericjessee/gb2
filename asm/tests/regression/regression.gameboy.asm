@@ -1,37 +1,44 @@
+;at this point, this is just the load example from the rgbasm docs. 
+;i don't support hli, or dec/inc of 16 bit registers yet, so I had to modify it.
+;this means that load sections can't be longer than 255 bytes (yet)
+
 include "global_defines.inc"
 
-SECTION "main", ROM0[$0]
-    call print_str
-test:
-    ;preload some data into ram for reading
-    ld h,$ff
-    ld l,$80
-    ld [hl],$be
-    inc l
-    ld [hl],$ef
-    ld l,$a0
-    ld [hl],$ff
-    ;run the tests
-    
+SECTION "LOAD example", ROM0
 
-section "subroutines", ROM0[$1000]
-print_str:
-    ld h,$20
-    ld l,$00
-    ld b,[hl]
+call CopyCode
+halt
+
+CopyCode:
+    ld de, RAMCode
+    ld hl, RAMLocation
+    ld c, RAMLocation.end - RAMLocation
+.loop
+    ld a, [de]
+    inc e
+    ld [hl], a
     inc l
-    ld a,[hl]
-str_loop:
-    ld [print_addr],a
-    inc l
-    ld a,[hl]
-    dec b
-    jp nz,str_loop
+    dec c
+    jp nz, .loop
+    ret
+    
+;this is the code that we are copying into the work ram
+;the LOAD block allows offsets, labels etc to be calculated as if they are inside WRAM0 (for this example)
+;meaning when we copy the code to WRAM0 (done by CopyCode) it will execute correctly
+RAMCode:
+  LOAD "RAM code", WRAM0
+RAMLocation:
+    ld hl, .string
+    ld de, $9864
+.copy
+    ld a, [hli]
+    ld [de], a
+    inc e
+    and a
+    jr nz, .copy
     ret
 
-
-section "string_1", ROM0[$2000]
-    db 20 ;string length
-    db "starting regression\n"
-    
-
+.string
+    db "Hello World!", 0
+.end
+  ENDL

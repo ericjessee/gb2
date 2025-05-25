@@ -9,6 +9,7 @@ https://rgbds.gbdev.io/docs/v0.5.1/gbz80.7
 instructions currently implemented and tested:\
 ld r8,r8 \
 ld r8,d8 \
+ld r16,d16 (?)\
 ld r8,[hl] \
 ld [hl],r8 \
 ld [hl],d8 \

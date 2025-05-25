@@ -15,7 +15,9 @@ sm83_core cpu(
     .*
 );
 
-mock_mem ROM0(
+mock_mem #(
+    .MEM_DEPTH(16'ha000)
+) ROM0(
     .*,
     .wen('0)
 );
@@ -28,6 +30,7 @@ always_comb begin
 end
 
 mock_mem #(
+    .MEM_DEPTH(16'h100),
     .IS_ROM(0)
 ) WRAM0(
     .*,

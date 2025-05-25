@@ -1,6 +1,9 @@
 `include "global_defines.vh"
 module mock_mem import sm83_pkg::*;
-#(parameter logic IS_ROM = 1)
+#(
+    parameter logic IS_ROM = 1,
+    parameter MEM_DEPTH = `TEST_MEM_DEPTH
+)
 (
     input  logic clk,
     input  logic rst_n,
@@ -12,7 +15,7 @@ module mock_mem import sm83_pkg::*;
 );
 /* verilator lint_off WIDTHTRUNC */
 //unpacked to hopefully make use of block ram at some point
-data_t mem [0:`TEST_MEM_DEPTH-1];
+data_t mem [0:MEM_DEPTH-1];
 
 
 initial begin

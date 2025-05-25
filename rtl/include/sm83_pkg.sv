@@ -34,85 +34,107 @@ typedef enum logic [1:0] {
 } mem_r16_sel_t;
 
 typedef enum logic [5:0] {
-    ALU_NOP,
-    ALU_LD1,
-    ALU_LD2,
-    ALU_ADC, ALU_ADD,
-    ALU_AND,
-    ALU_CP,
-    ALU_DEC, ALU_INC,
-    ALU_OR,
-    ALU_SBC, ALU_SUB,
-    ALU_XOR,
-    ALU_BIT_0, ALU_BIT_1, ALU_BIT_2, ALU_BIT_3,
-    ALU_BIT_4, ALU_BIT_5, ALU_BIT_6, ALU_BIT_7,
-    ALU_RES_0, ALU_RES_1, ALU_RES_2, ALU_RES_3,
-    ALU_RES_4, ALU_RES_5, ALU_RES_6, ALU_RES_7,
-    ALU_SET_0, ALU_SET_1, ALU_SET_2, ALU_SET_3,
-    ALU_SET_4, ALU_SET_5, ALU_SET_6, ALU_SET_7,
-    ALU_SWAP,
-    ALU_RL,
-    ALU_RLC,
-    ALU_RR,
-    ALU_RRA,
-    ALU_RRC,
-    ALU_RRCA,
-    ALU_SLA,
-    ALU_SRA,
-    ALU_SRL,
-    ALU_SCF,
-    ALU_CCF,
-    ALU_CPL,
-    ALU_DAA
+    ALU_NOP,              // 0x00
+    ALU_LD1,              // 0x01
+    ALU_LD2,              // 0x02
+    ALU_ADC,              // 0x03
+    ALU_ADD,              // 0x04
+    ALU_AND,              // 0x05
+    ALU_CP,               // 0x06
+    ALU_DEC,              // 0x07
+    ALU_INC,              // 0x08
+    ALU_OR,               // 0x09
+    ALU_SBC,              // 0x0A
+    ALU_SUB,              // 0x0B
+    ALU_XOR,              // 0x0C
+    ALU_BIT_0,            // 0x0D
+    ALU_BIT_1,            // 0x0E
+    ALU_BIT_2,            // 0x0F
+    ALU_BIT_3,            // 0x10
+    ALU_BIT_4,            // 0x11
+    ALU_BIT_5,            // 0x12
+    ALU_BIT_6,            // 0x13
+    ALU_BIT_7,            // 0x14
+    ALU_RES_0,            // 0x15
+    ALU_RES_1,            // 0x16
+    ALU_RES_2,            // 0x17
+    ALU_RES_3,            // 0x18
+    ALU_RES_4,            // 0x19
+    ALU_RES_5,            // 0x1A
+    ALU_RES_6,            // 0x1B
+    ALU_RES_7,            // 0x1C
+    ALU_SET_0,            // 0x1D
+    ALU_SET_1,            // 0x1E
+    ALU_SET_2,            // 0x1F
+    ALU_SET_3,            // 0x20
+    ALU_SET_4,            // 0x21
+    ALU_SET_5,            // 0x22
+    ALU_SET_6,            // 0x23
+    ALU_SET_7,            // 0x24
+    ALU_SWAP,             // 0x25
+    ALU_RL,               // 0x26
+    ALU_RLC,              // 0x27
+    ALU_RR,               // 0x28
+    ALU_RRA,              // 0x29
+    ALU_RRC,              // 0x2A
+    ALU_RRCA,             // 0x2B
+    ALU_SLA,              // 0x2C
+    ALU_SRA,              // 0x2D
+    ALU_SRL,              // 0x2E
+    ALU_SCF,              // 0x2F
+    ALU_CCF,              // 0x30
+    ALU_CPL,              // 0x31
+    ALU_DAA               // 0x32
 } alu_op_t;
 
-typedef enum logic [7:0] { //should be downsized
-    CTL_NOP,
-    CTL_HALT,
-    CTL_STOP, //?
-    CTL_RST,
-    CTL_DI,
-    CTL_EI,
-    CTL_JR,
-    CTL_JR_COND,
-    CTL_JP_COND,
-    CTL_JP_A16,
-    CTL_JP_HL,
-    CTL_CALL_A16,
-    CTL_CALL_COND_A16,
-    CTL_RET_COND,
-    CTL_RET,
-    CTL_RETI,
-    CTL_ALU_A,
-    CTL_ALU_A_R8,
-    CTL_ALU_A_D8,
-    CTL_ALU_R8,
-    CTL_ALU_HL_R16,
-    CTL_ADD_SP_D8,
-    CTL_LD_HL_SP_D8,
-    CTL_LD_SP_HL,
-    CTL_LD_R8_D8,
-    CTL_LD_R8_R8,
-    CTL_LD_R16_D16,
-    CTL_LDPTR_R8_HL,
-    CTL_LDPTR_HL_R8,
-    CTL_LDPTR_HL_D8,
-    CTL_LDPTR_R16_A,
-    CTL_LDPTR_A_R16,
-    CTL_LDPTR_R16_D8,
-    CTL_LDPTR_R8_R16,
-    CTL_LDPTR_D16_SP,
-    CTL_LDPTRH_C_A,
-    CTL_LDPTRH_A_C,
-    CTL_LDPTR_A8_A,
-    CTL_LDPTR_A_A8,
-    CTL_LDPTR_A16_A,
-    CTL_LDPTR_A_A16,
-    CTL_INC16,
-    CTL_DEC16,
-    CTL_POP_STACK,
-    CTL_PUSH_STACK
+typedef enum logic [7:0] { // should be downsized
+    CTL_NOP,               // 0x00
+    CTL_HALT,              // 0x01
+    CTL_STOP,              // 0x02
+    CTL_RST,               // 0x03
+    CTL_DI,                // 0x04
+    CTL_EI,                // 0x05
+    CTL_JR,                // 0x06
+    CTL_JR_COND,           // 0x07
+    CTL_JP_COND,           // 0x08
+    CTL_JP_A16,            // 0x09
+    CTL_JP_HL,             // 0x0A
+    CTL_CALL_A16,          // 0x0B
+    CTL_CALL_COND_A16,     // 0x0C
+    CTL_RET_COND,          // 0x0D
+    CTL_RET,               // 0x0E
+    CTL_RETI,              // 0x0F
+    CTL_ALU_A,             // 0x10
+    CTL_ALU_A_R8,          // 0x11
+    CTL_ALU_A_D8,          // 0x12
+    CTL_ALU_R8,            // 0x13
+    CTL_ALU_HL_R16,        // 0x14
+    CTL_ADD_SP_D8,         // 0x15
+    CTL_LD_HL_SP_D8,       // 0x16
+    CTL_LD_SP_HL,          // 0x17
+    CTL_LD_R8_D8,          // 0x18
+    CTL_LD_R8_R8,          // 0x19
+    CTL_LD_R16_D16,        // 0x1A
+    CTL_LDPTR_R8_HL,       // 0x1B
+    CTL_LDPTR_HL_R8,       // 0x1C
+    CTL_LDPTR_HL_D8,       // 0x1D
+    CTL_LDPTR_R16_A,       // 0x1E
+    CTL_LDPTR_A_R16,       // 0x1F
+    CTL_LDPTR_R16_D8,      // 0x20
+    CTL_LDPTR_R8_R16,      // 0x21
+    CTL_LDPTR_D16_SP,      // 0x22
+    CTL_LDPTRH_C_A,        // 0x23
+    CTL_LDPTRH_A_C,        // 0x24
+    CTL_LDPTR_A8_A,        // 0x25
+    CTL_LDPTR_A_A8,        // 0x26
+    CTL_LDPTR_A16_A,       // 0x27
+    CTL_LDPTR_A_A16,       // 0x28
+    CTL_INC16,             // 0x29
+    CTL_DEC16,             // 0x2A
+    CTL_POP_STACK,         // 0x2B
+    CTL_PUSH_STACK         // 0x2C
 } ctl_op_t;
+
 
 typedef enum logic [7:0] { //should size this smaller
     EX_IDLE,

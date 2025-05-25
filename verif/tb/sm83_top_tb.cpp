@@ -8,6 +8,8 @@
 #include "verilated_vcd_c.h"
 #include <Vsm83_top.h>
 
+#define MAX_CYCLE_COUNT 200
+
 static vluint64_t time_stamp = 0;
 
 double sc_time_stamp() {
@@ -16,9 +18,11 @@ double sc_time_stamp() {
 
 class SM83_Top_TB {
     public:
+        int timeout_ctr;
         SM83_Top_TB()
             : sm83_top(new Vsm83_top)
         {
+            timeout_ctr = 0;
             sm83_top->clk = 0;
             enableTrace();
         }
@@ -68,14 +72,14 @@ class SM83_Top_TB {
             }
         }
 
-
-
         void initial() {
             sm83_top->rst_n = 0;
             wait_cycles(4);
             sm83_top->rst_n = 1;
-            while (!sm83_top->halt) 
+            while ((!sm83_top->halt) && (timeout_ctr < MAX_CYCLE_COUNT)) {
                 wait_cycles(1);
+                timeout_ctr++;
+            }
         }
 
     private: 
