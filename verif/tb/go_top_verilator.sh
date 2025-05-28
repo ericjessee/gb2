@@ -18,20 +18,20 @@ rm -rf verilator_dir
 mkdir -p verilator_dir
 pushd verilator_dir
 
-verilator --trace +incdir+$relpath_rtl \
-                  +incdir+$relpath_rtl/stages \
-                  +incdir+$relpath_rtl_inc \
-                  +incdir+$relpath_verif \
-                  +incdir+$relpath_verif/tb \
-                  +incdir+$relpath_verif_include \
-                  -DVERILATOR_SIM \
-                  --trace-structs \
-                  --trace-max-array 256 \
-                  --build --exe --cc --trace --timing \
-                  -Wno-ASCRANGE \
-                  sm83_top.sv \
-                  ../sm83_top_tb.cpp \
-                  -o sm83_top_tb \
+verilator +incdir+$relpath_rtl \
+          +incdir+$relpath_rtl/stages \
+          +incdir+$relpath_rtl_inc \
+          +incdir+$relpath_verif \
+          +incdir+$relpath_verif/tb \
+          +incdir+$relpath_verif_include \
+          -DVERILATOR_SIM \
+          --trace-structs \
+          --trace-max-array 256 \
+          --build --exe --cc --trace --timing \
+          -Wno-ASCRANGE \
+          sm83_top.sv \
+          ../sm83_top_tb.cpp \
+          -o sm83_top_tb
 
 ./obj_dir/sm83_top_tb
 
