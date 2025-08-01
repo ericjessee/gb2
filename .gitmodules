@@ -1,3 +1,4 @@
-[submodule "synth/mojo-base-project"]
+[submodule "mojo-base-project"]
+	branch = gb2
 	path = synth/mojo-base-project
 	url = git@github.com:ericjessee/mojo-base-project.git
