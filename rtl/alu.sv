@@ -38,6 +38,7 @@ always_comb begin
     //used for half carry flags
     full_result = '0;
     ignore_carry = '0;
+    out_flags = in_flags;
     unique case(alu_op)
     /* verilator lint_off WIDTHEXPAND */
         ALU_LD1: begin

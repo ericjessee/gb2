@@ -96,7 +96,7 @@ end
 always_comb begin
     new_ir = r_data; //ir only takes instructions from memory
     reg_wen_vec = '0;
-
+    new_sp = sp;
     new_a = alu_res;
     new_gp8 = alu_res;
 

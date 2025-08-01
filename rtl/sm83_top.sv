@@ -36,6 +36,7 @@ mock_mem #(
     .MEM_DEPTH(16'ha000)
 ) ROM0(
     .clk(clk),
+    .rst_n(rst_n),
     .wen('0),
     .r_addr(addr_out),
     .w_addr(addr_out),
@@ -55,6 +56,7 @@ mock_mem #(
     .IS_ROM(0)
 ) WRAM0(
     .clk(clk),
+    .rst_n(rst_n),
     .wen(wram0_wen),
     .r_addr(wram0_local_addr),
     .w_addr(wram0_local_addr),
