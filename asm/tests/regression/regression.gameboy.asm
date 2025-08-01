@@ -7,6 +7,7 @@ include "global_defines.inc"
 SECTION "LOAD example", ROM0
 
 call CopyCode
+call RAMLocation
 halt
 
 CopyCode:
@@ -29,9 +30,10 @@ RAMCode:
   LOAD "RAM code", WRAM0
 RAMLocation:
     ld hl, .string
-    ld de, $9864
+    ld de, print_addr
 .copy
-    ld a, [hli]
+    ld a, [hl]
+    inc l
     ld [de], a
     inc e
     and a

@@ -8,7 +8,7 @@
 #include "verilated_vcd_c.h"
 #include <Vsm83_top.h>
 
-#define MAX_CYCLE_COUNT 200
+#define MAX_CYCLE_COUNT 2000
 
 static vluint64_t time_stamp = 0;
 
