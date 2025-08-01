@@ -1,4 +1,4 @@
-module fetch (
+module fetch import sm83_pkg::*;(
     input clk,
     input rst_n,
 

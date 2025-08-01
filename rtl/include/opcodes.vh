@@ -1,3 +1,6 @@
+`ifndef __OPCODES_VH__
+`define __OPCODES_VH__
+
 typedef enum logic [7:0] {
     OP_NOP          = 8'h00,
     OP_LD_BC_D16    = 8'h01,
@@ -515,3 +518,5 @@ typedef enum logic [7:0] {
     OP_SET7PTR_HL   = 8'hfe,
     OP_SET7_A       = 8'hff
 } opcode16_t;
+
+`endif //__OPCODES_VH__

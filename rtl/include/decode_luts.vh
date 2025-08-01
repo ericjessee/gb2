@@ -1,3 +1,6 @@
+`ifndef __DECODE_LUTS_VH__
+`define __DECODE_LUTS_VH__
+
 function alu_op_t map_b2_b3_alu_op(
     input b2_3_alu_op_t alu_op
 );
@@ -140,3 +143,5 @@ begin
     endcase
 end
 endfunction
+
+`endif //__DECODE_LUTS_VH__

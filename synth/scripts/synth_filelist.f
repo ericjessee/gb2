@@ -1,0 +1,10 @@
+rtl/include/sm83_pkg.sv
+rtl/stages/decode.sv
+rtl/stages/fetch.sv
+rtl/alu.sv
+rtl/control.sv
+rtl/idu.sv
+rtl/mock_mem_pathed.sv
+rtl/register_file.sv
+rtl/sm83_core.sv
+rtl/sm83_top.sv
