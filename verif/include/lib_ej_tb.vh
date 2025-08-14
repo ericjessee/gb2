@@ -35,8 +35,8 @@ end
 
 always @(posedge clk) begin
     if (w_wen) begin
-        if (w_addr == 16'hffb0)
-            $write("%s",w_data);
+        if (addr_out == 16'hffb0)
+            $write("%s",w_data_out);
     end
 end
 

@@ -1,4 +1,3 @@
-`include "sm83_pkg.sv"
 `include "mock_mem_pathed.sv"
 module sm83_top import sm83_pkg::*;(
     input         clk,
@@ -66,7 +65,7 @@ mock_mem #(
 
 `ifdef VERILATOR_SIM
 logic [15:0] addr_concat;
-assign addr_concat = 16'(r_addr);
+assign addr_concat = 16'(addr_out);
 `endif
 
 endmodule

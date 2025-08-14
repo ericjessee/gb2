@@ -43,8 +43,8 @@ class SM83_Top_TB {
 
         void check_print(){
             if (sm83_top->w_wen) {
-                if (sm83_top->w_addr == 0xffb0){
-                    printf("%c", sm83_top->w_data);
+                if (sm83_top->addr_out == 0xffb0){
+                    printf("%c", sm83_top->w_data_out);
                 }
             }
         }

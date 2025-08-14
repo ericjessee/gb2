@@ -4,12 +4,10 @@ logic clk;
 logic rst_n;
 
 `include "lib_ej_tb.vh"
-data_t r_data;
-data_t w_data;
-addr_t r_addr;
-addr_t w_addr;
-logic  w_wen;
-
+data_t r_data_out;
+data_t w_data_out;
+addr_t addr_out;
+logic w_wen;
 logic halt;
 
 sm83_top dut(.*);

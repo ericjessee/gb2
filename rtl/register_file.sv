@@ -70,7 +70,7 @@ end
 
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
-        reg_vec <= '0;
+        reg_vec <= reg_reset_vals;
     end else begin
         if (wen.ir) reg_vec.ir <= w_ir;
         if (wen.ie) reg_vec.ie <= w_ie;
