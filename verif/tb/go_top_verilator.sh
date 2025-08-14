@@ -5,10 +5,15 @@ relpath_rtl_inc=$relpath_rtl/include
 relpath_verif=../..
 relpath_verif_include=$relpath_verif/include
 
+# Set ASM to default if not defined
+if [ -z "$ASM" ]; then
+    ASM="/home/eric/Projects/gb2/asm/tests/regression/regression.gameboy.asm"
+fi
+
 echo "compile the gb asm file..."
 pushd ../../asm/scripts
-basename=$(basename $1 .gameboy.asm)
-./build.sh $1 #TODO exit if compile fails
+basename=$(basename "$ASM" .gameboy.asm)
+./build.sh "$ASM" #TODO exit if compile fails
 popd
 
 echo "replacing correct mem path..."

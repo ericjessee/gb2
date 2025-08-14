@@ -35,12 +35,11 @@ RAMLocation:
     ld a, [hl]
     inc l
     ld [de], a
-    inc e
     and a
     jr nz, .copy
     ret
 
 .string
-    db "Hello World!", 0
+    db "Hello World!\n", 0
 .end
   ENDL

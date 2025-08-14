@@ -75,7 +75,10 @@ always_comb begin
                                 ctl_op = CTL_JR;
                             else if (instr.body.b0.jp.is_cond) begin
                                 ctl_op    = CTL_JR_COND;
+                                alu_op    = ALU_ADD;
                                 jump_cond = instr.body.b0.jp.cond;
+                                r8_sel[0] = REG_B;
+                                r8_sel[1] = REG_Z;
                             end
                         end
                         else if (full_opcode == OP_LDPTR_A16_SP) begin //load SP value to immediate pointer

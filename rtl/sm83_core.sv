@@ -16,7 +16,10 @@ logic inc_r16;
 logic dec_r16;
 logic wz_to_pc;
 logic mem_to_z;
+logic alu_to_z;
 logic mem_to_w;
+logic idu_to_w;
+logic z_adj_pcl;
 logic mem_to_ir;
 logic mem_to_r8;
 logic capture_alu_res;
@@ -43,8 +46,8 @@ r8_t new_ir;
 r8_t r_a;
 r8_t new_a;
 
-r8_t r_f;
-r8_t new_f;
+flags_t r_f;
+flags_t new_f;
 
 r8_t r_gp8;
 r8_t new_gp8;
@@ -65,6 +68,7 @@ data_t alu_res;
 
 //idu signals
 logic idu_inc_ndec;
+logic idu_bypass;
 r16_t idu_in;
 r16_t idu_out;
 
@@ -84,11 +88,18 @@ logic [2:0]       decode_rst_tgt;
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n)
         r_wz = 0;
-    else
+    else begin
         if (mem_to_z)
             r_wz.lsb = r_data;
         else if (mem_to_w)
             r_wz.msb = r_data;
+        else if (idu_to_w)
+            r_wz.msb = r8_t'(idu_out);
+        
+        if (alu_to_z)
+            r_wz.lsb = alu_res;
+    end
+
 end
 
 
@@ -101,6 +112,7 @@ always_comb begin
     new_gp8 = alu_res;
 
     //gp8 selection comes straight from decode. just need wen
+    //edge case is for relative jumps, where we need to write to reg_z. handled separately.
     if (capture_alu_res) begin
         case (decode_alu_rd_sel) 
             REG_A: reg_wen_vec.a = 1;
@@ -182,9 +194,9 @@ always_comb begin
     if (r8_to_alu_op1) begin
         if (decode_r8_sel[0] == REG_A)
             alu_op1 = r_a;
-        else if (decode_r8_sel[0] == REG_Z)
+        else if (decode_r8_sel[0] == REG_Z) begin
             alu_op1 = r_wz.lsb;
-        else
+        end else
             alu_op1 = r_gp8;
     end
     else if (alu_op_a_r8) begin
@@ -192,8 +204,12 @@ always_comb begin
         alu_op2 = r_gp8;
     end
 
-    if (decode_r8_sel[1] == REG_Z) //?? is this still valid?
+    if (decode_r8_sel[1] == REG_Z)
         alu_op2 = r_wz.lsb;
+        if (z_adj_pcl)
+            alu_op1 = pc.lsb;
+    else if (decode_r8_sel[1] == REG_A)
+        alu_op2 = r_a;
 end
 
 alu alu_0(
@@ -209,6 +225,7 @@ alu alu_0(
 always_comb begin 
     // idu_in = '0;
     idu_inc_ndec = '1;
+    idu_bypass = '0;
     if (inc_pc) begin
         idu_inc_ndec = 1;
     end
@@ -218,10 +235,19 @@ always_comb begin
     else if (dec_r16) begin
         idu_inc_ndec = 0;
     end
+
+    //specifically for relative jumps, determine if w needs to be adjusted
+    if (idu_to_w & r_f.h & !r_wz.lsb[7]) //very close but the z sign is wrong maybe??
+        idu_inc_ndec = 1;
+    else if (idu_to_w & !r_f.h & r_wz.lsb[7])
+        idu_inc_ndec = 0;
+    else if (idu_to_w)
+        idu_bypass = 1;
 end
 
 idu idu_0(
     .inc_ndec(idu_inc_ndec),
+    .bypass(idu_bypass),
     .r16_in(r_addr),
     .r16_out(idu_out)
 );
@@ -232,6 +258,7 @@ assign w_addr = r_addr;
 always_comb begin
     case (addr_sel) //w_addr may not be needed for some of these
         PC:   r_addr = pc;
+        PCH:  r_addr = r16_t'(pc.msb);
         SP:   r_addr = sp;
         GP16: r_addr = addr_t'(r_gp16);
         WZ:   r_addr = addr_t'(r_wz);
@@ -292,7 +319,10 @@ control ctl(
     .dec_r16(dec_r16),
     .wz_to_pc(wz_to_pc),
     .mem_to_z(mem_to_z),
+    .alu_to_z(alu_to_z),
+    .z_adj_pcl(z_adj_pcl),
     .mem_to_w(mem_to_w),
+    .idu_to_w(idu_to_w),
     .mem_to_ir(mem_to_ir),
     .mem_to_r8(mem_to_r8),
     .capture_alu_res(capture_alu_res),

@@ -1,3 +1,7 @@
+`ifdef VERILATOR_SIM 
+`include "sm83_pkg.sv" //why??
+`endif
+
 `include "global_defines.vh"
 module mock_mem import sm83_pkg::*;
 #(

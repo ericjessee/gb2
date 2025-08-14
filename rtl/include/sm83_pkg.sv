@@ -154,12 +154,14 @@ typedef enum logic [7:0] { //should size this smaller
     EX_DEC_R16,
     EX_PCH_TO_MEM,
     EX_PCL_TO_MEM,
+    EX_ADJ_PC_TO_WZ,
     EX_HALT
 } ex_state_t;
 
 typedef enum logic [2:0] {
     NONE,
     PC,
+    PCH,
     SP,
     GP16,
     WZ,

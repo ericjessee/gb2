@@ -13,7 +13,10 @@ module control import sm83_pkg::*;(
     output logic      dec_r16,
     output logic      wz_to_pc,
     output logic      mem_to_z,
+    output logic      alu_to_z,
+    output logic      z_adj_pcl,
     output logic      mem_to_w,
+    output logic      idu_to_w,
     output logic      mem_to_ir,
     output logic      mem_to_r8,
     output logic      capture_alu_res,
@@ -108,6 +111,10 @@ always_comb begin
             execute_sequence = {EX_MEM_TO_Z, EX_MEM_TO_W_COND, EX_WZ_TO_PC, {3{EX_IDLE}}};
             last_idx = jp_taken ? 3 : 2;
         end
+        CTL_JR_COND: begin //almost working, but the relative jump adjustment isn't correct
+            execute_sequence = {EX_MEM_TO_Z, EX_ADJ_PC_TO_WZ, EX_WZ_TO_PC, {3{EX_IDLE}}};
+            last_idx = jp_taken ? 3 : 2;
+        end
         CTL_CALL_A16: begin
             execute_sequence = {EX_MEM_TO_Z, EX_MEM_TO_W, EX_DEC_R16, EX_PCH_TO_MEM, EX_PCL_TO_MEM, EX_IDLE};
             last_idx = 5;
@@ -138,7 +145,10 @@ always_comb begin
     dec_r16 = '0;
     wz_to_pc = '0;
     mem_to_z = '0;
+    alu_to_z = '0;
     mem_to_w = '0;
+    idu_to_w = '0;
+    z_adj_pcl = '0;
     mem_to_ir = '0;
     mem_to_r8 = '0;
     capture_alu_res = '0;
@@ -193,6 +203,15 @@ always_comb begin
                 CTL_JP_A16,
                 CTL_JP_COND,
                 CTL_CALL_A16:     inc_pc   = 1;
+                CTL_JR_COND: begin
+                    inc_pc   = 1;
+                    case (jump_cond)
+                        J_NZ: jp_cond_true = !flags.z; 
+                        J_Z:  jp_cond_true = flags.z;
+                        J_NC: jp_cond_true = !flags.c; 
+                        J_C:  jp_cond_true = flags.c;
+                    endcase
+                end
                 CTL_RET:          {inc_r16, addr_sel} = {1'b1, SP};
                 //load high from ff + c
                 CTL_LDPTRH_A_C:  addr_sel = FF_C;
@@ -268,6 +287,15 @@ always_comb begin
             pcl_to_mem = '1;
             wz_to_pc = '1;
             addr_sel = SP;
+        end
+        EX_ADJ_PC_TO_WZ: begin
+            jp_cond_true = jp_taken; //propagate for WZ_TO_PC
+            if (jp_taken) begin
+                idu_to_w = '1;
+                z_adj_pcl = '1;
+                alu_to_z = '1;
+                addr_sel = PCH;
+            end
         end
         EX_HALT: begin
             to_halt = 1;
