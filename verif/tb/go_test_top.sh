@@ -3,10 +3,24 @@
 #i will assume that you have already sourced your settings64.sh, so leaving it commented out.
 source ~/usbdisk/Xilinx/Vivado/2024.2/settings64.sh
 
+# Set ASM to default if not defined
+if [ -z "$ASM" ]; then
+    ASM="/home/eric/Projects/gb2/asm/tests/regression/regression.gameboy.asm"
+fi
+
+# Accept -waves flag regardless of position
+waves_flag=0
+for arg in "$@"; do
+    if [ "$arg" = "-waves" ]; then
+        waves_flag=1
+        break
+    fi
+done
+
 echo "compile the gb asm file..."
 pushd ../../asm/scripts
-basename=$(basename $1 .gameboy.asm)
-./build.sh $1 #TODO exit if compile fails
+basename=$(basename "$ASM" .gameboy.asm)
+./build.sh "$ASM" #TODO exit if compile fails
 popd
 
 echo "replacing correct mem path..."
@@ -53,10 +67,10 @@ if [ $? -ne 0 ]; then
 fi
 
 # Run the simulation if both commands are successful
-if [ "$2" = "-waves" ]; then
+if [ $waves_flag -eq 1 ]; then
     xsim --gui work.sm83_top_tb --view work.sm83_top_tb.wcfg &
 else
     xsim work.sm83_top_tb -R
 fi
-# xsim work.sm83_top_tb -R
+
 popd
