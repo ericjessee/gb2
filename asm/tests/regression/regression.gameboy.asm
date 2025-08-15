@@ -4,42 +4,36 @@
 
 include "global_defines.inc"
 
-SECTION "LOAD example", ROM0
+SECTION "main", ROM0
+    ld hl, string1 ; "Beginning regression..."
+    call print_str
+    call cp_r8
+    call ld_r8_r8
+    call add_a_r8
+    ;call call_cc
+    halt
 
-call CopyCode
-call RAMLocation
-halt
+;helper subroutines here
+include "utils.inc"
 
-CopyCode:
-    ld de, RAMCode
-    ld hl, RAMLocation
-    ld c, RAMLocation.end - RAMLocation
-.loop
-    ld a, [de]
-    inc e
-    ld [hl], a
-    inc l
-    dec c
-    jp nz, .loop
+fail_case:
+    ld hl, fail_str
+    call print_str
     ret
-    
-;this is the code that we are copying into the work ram
-;the LOAD block allows offsets, labels etc to be calculated as if they are inside WRAM0 (for this example)
-;meaning when we copy the code to WRAM0 (done by CopyCode) it will execute correctly
-RAMCode:
-  LOAD "RAM code", WRAM0
-RAMLocation:
-    ld hl, .string
-    ld de, print_addr
-.copy
-    ld a, [hl]
-    inc l
-    ld [de], a
-    and a
-    jr nz, .copy
+pass_case:
+    ld hl, pass_str
+    call print_str
     ret
 
-.string
-    db "Hello World!\n", 0
-.end
-  ENDL
+;regression tests here
+include "regr_cp_r8.inc"
+include "regr_ld_r8_r8.inc"
+include "regr_add_a_r8.inc"
+include "regr_call_cc.inc"
+
+string1:
+    db "Beginning regression...\n", 0
+pass_str:
+    db "pass!\n", 0
+fail_str:
+    db "fail!\n", 0
