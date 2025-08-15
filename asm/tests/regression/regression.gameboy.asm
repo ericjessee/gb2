@@ -4,13 +4,23 @@
 
 include "global_defines.inc"
 
-SECTION "main", ROM0
-    ld hl, string1 ; "Beginning regression..."
+SECTION "main", ROM0[$100] ;before $100 are the reset vectors and ISRs
+
+    jp EntryPoint
+    db 0
+    NINTENDO_LOGO
+    ds $150 - @, 0 ; $100-$150 is the cartridge header, must be untouched
+
+EntryPoint:
+    ld hl, begin_str ; "Beginning regression..."
     call print_str
     call cp_r8
     call ld_r8_r8
     call add_a_r8
-    ;call call_cc
+    call call_test
+    call call_cc
+    call dec_r8_test
+    call inc_r8_test
     halt
 
 ;helper subroutines here
@@ -29,9 +39,12 @@ pass_case:
 include "regr_cp_r8.inc"
 include "regr_ld_r8_r8.inc"
 include "regr_add_a_r8.inc"
+include "regr_call.inc"
 include "regr_call_cc.inc"
+include "regr_dec_r8.inc"
+include "regr_inc_r8.inc"
 
-string1:
+begin_str:
     db "Beginning regression...\n", 0
 pass_str:
     db "pass!\n", 0

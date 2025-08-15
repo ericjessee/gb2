@@ -32,7 +32,7 @@ sm83_core cpu(
 );
 
 mock_mem #(
-    .MEM_DEPTH(16'ha000)
+    .MEM_DEPTH(16'h4000) //i think this should be up to 3fff?
 ) ROM0(
     .clk(clk),
     .rst_n(rst_n),

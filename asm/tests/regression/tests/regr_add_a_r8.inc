@@ -4,7 +4,7 @@ add_a_r8:
     ld a,$55
     ld d,$32
     add a,d
-    ld a,b ;move result to b
+    ld b,a ;move result to b
     ld a,$87 ;0x55 + 0x32 = 0x87
     cp b
     jp z,pass_case

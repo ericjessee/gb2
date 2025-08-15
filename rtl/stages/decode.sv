@@ -16,7 +16,7 @@ alu_op_t  bit_op_base;
 opcode8_t full_opcode;
 
 always_comb begin
-    r8_sel = '1;
+    r8_sel = {REG_A, REG_A};
     alu_rd_sel = gp_r8_sel_t'(4'b1111);
     r16_sel = 2'b11;
     alu_op = ALU_NOP;
@@ -125,8 +125,10 @@ always_comb begin
                         end
                     end
                     BLOCK_2: begin
-                        ctl_op = CTL_ALU_A_R8;
+                        ctl_op = CTL_ALU_R8;
                         r8_sel[0] = instr.body.b2.r8;
+                        r8_sel[1] = REG_A;
+                        alu_rd_sel = REG_A;
                         alu_op = map_b2_b3_alu_op(instr.body.b2.alu_op);
                     end
                     BLOCK_3: begin

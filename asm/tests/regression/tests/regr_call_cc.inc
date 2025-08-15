@@ -4,13 +4,14 @@ call_cc:
     ld a,$23
     ld b,$23
     sub a,b
+    ld a,$88
     call z, call_cc_pass
-    cp a,$88
+    cp b
     jp z,pass_case
     jp fail_case
 
 call_cc_pass:
-    ld a,$88
+    ld b,a
     ret
 
 call_cc_str:

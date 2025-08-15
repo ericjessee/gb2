@@ -17,7 +17,7 @@ for arg in "$@"; do
     fi
 done
 
-echo "compile the gb asm file..."
+echo "assemble the gb asm file..."
 pushd ../../asm/scripts
 basename=$(basename "$ASM" .gameboy.asm)
 ./build.sh "$ASM" #TODO exit if compile fails

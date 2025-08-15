@@ -202,7 +202,8 @@ always_comb begin
                 CTL_LDPTR_A16_A,
                 CTL_JP_A16,
                 CTL_JP_COND,
-                CTL_CALL_A16:     inc_pc   = 1;
+                CTL_CALL_A16:      inc_pc   = 1;
+                CTL_CALL_COND_A16: inc_pc   = 1;
                 CTL_JR_COND: begin
                     inc_pc   = 1;
                     case (jump_cond)
@@ -272,11 +273,15 @@ always_comb begin
             inc_r16 = '1;
         end
         EX_DEC_R16: begin
+            dec_r16 = '1;
             case (ctl_op)
                CTL_CALL_A16: addr_sel = SP;
+               CTL_CALL_COND_A16: begin
+                    if (jp_taken) addr_sel = SP;
+                    else dec_r16 = '0;
+               end
                default: addr_sel = SP;
             endcase
-            dec_r16 = '1;
         end
         EX_PCH_TO_MEM: begin
             pch_to_mem = '1;
@@ -293,6 +298,7 @@ always_comb begin
             if (jp_taken) begin
                 idu_to_w = '1;
                 z_adj_pcl = '1;
+                update_flags = '1;
                 alu_to_z = '1;
                 addr_sel = PCH;
             end

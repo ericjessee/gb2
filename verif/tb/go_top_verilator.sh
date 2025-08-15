@@ -10,7 +10,7 @@ if [ -z "$ASM" ]; then
     ASM="/home/eric/Projects/gb2/asm/tests/regression/regression.gameboy.asm"
 fi
 
-echo "compile the gb asm file..."
+echo "assemble the gb asm file..."
 pushd ../../asm/scripts
 basename=$(basename "$ASM" .gameboy.asm)
 ./build.sh "$ASM" #TODO exit if compile fails

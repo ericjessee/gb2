@@ -208,7 +208,7 @@ always_comb begin
         alu_op2 = r_wz.lsb;
         if (z_adj_pcl)
             alu_op1 = pc.lsb;
-    else if (decode_r8_sel[1] == REG_A)
+    else if ((decode_r8_sel[1] == REG_A)) //when would i need this?
         alu_op2 = r_a;
 end
 
@@ -237,9 +237,9 @@ always_comb begin
     end
 
     //specifically for relative jumps, determine if w needs to be adjusted
-    if (idu_to_w & r_f.h & !r_wz.lsb[7]) //very close but the z sign is wrong maybe??
+    if (idu_to_w & new_f.h & !r_wz.lsb[7]) //very close but the z sign is wrong maybe??
         idu_inc_ndec = 1;
-    else if (idu_to_w & !r_f.h & r_wz.lsb[7])
+    else if (idu_to_w & !new_f.h & r_wz.lsb[7])
         idu_inc_ndec = 0;
     else if (idu_to_w)
         idu_bypass = 1;
