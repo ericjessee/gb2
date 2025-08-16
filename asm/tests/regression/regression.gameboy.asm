@@ -5,7 +5,6 @@
 include "global_defines.inc"
 
 SECTION "main", ROM0[$100] ;before $100 are the reset vectors and ISRs
-
     jp EntryPoint
     db 0
     NINTENDO_LOGO
@@ -21,6 +20,8 @@ EntryPoint:
     call call_cc
     call dec_r8_test
     call inc_r8_test
+    call jp_a16
+    call ldh_a_c
     halt
 
 ;helper subroutines here
@@ -43,6 +44,8 @@ include "regr_call.inc"
 include "regr_call_cc.inc"
 include "regr_dec_r8.inc"
 include "regr_inc_r8.inc"
+include "regr_jp_a16.inc"
+include "regr_ldh_a_c.inc"
 
 begin_str:
     db "Beginning regression...\n", 0
