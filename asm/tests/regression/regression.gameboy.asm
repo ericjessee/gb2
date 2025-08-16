@@ -4,6 +4,9 @@
 
 include "global_defines.inc"
 
+SECTION "data", ROM0[$3000]
+    db $be,$ef,$ca,$fe
+
 SECTION "main", ROM0[$100] ;before $100 are the reset vectors and ISRs
     jp EntryPoint
     db 0
@@ -21,7 +24,10 @@ EntryPoint:
     call dec_r8_test
     call inc_r8_test
     call jp_a16
+    call jp_cc_a16
     call ldh_a_c
+    call ld_a_n16
+    call ld_a_r16
     halt
 
 ;helper subroutines here
@@ -45,7 +51,10 @@ include "regr_call_cc.inc"
 include "regr_dec_r8.inc"
 include "regr_inc_r8.inc"
 include "regr_jp_a16.inc"
+include "regr_jp_cc_a16.inc"
 include "regr_ldh_a_c.inc"
+include "regr_ld_a_n16.inc"
+include "regr_ld_a_r16.inc"
 
 begin_str:
     db "Beginning regression...\n", 0

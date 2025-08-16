@@ -51,14 +51,14 @@ logic wram0_wen;
 addr_t hram_local_addr;
 logic hram_wen;
 always_comb begin
-    wram0_local_addr = addr_out - 16'hc000; //r and w are tied together
+    wram0_local_addr = addr_out - 16'hc000;
     wram0_wen = w_wen & (addr_out >= 16'hc000) & (addr_out <= 16'hcfff);
     hram_local_addr = addr_out - 16'hff80;
     hram_wen = w_wen & (addr_out >= 16'hff80) & (addr_out <= 16'hfffe);
 end
 
 mock_mem #(
-    .MEM_DEPTH(16'h100),
+    .MEM_DEPTH(16'h1000),
     .IS_ROM(0)
 ) WRAM0(
     .clk(clk),

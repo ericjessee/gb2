@@ -13,4 +13,4 @@ jp_a16_inc_a:
     inc a
     jp jp_a16_check
 jp_a16_str:
-    db " test jump to 16 bit absolute...", 0
+    db " test jump to n16 pointer...", 0
