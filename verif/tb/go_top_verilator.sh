@@ -14,6 +14,10 @@ echo "assemble the gb asm file..."
 pushd ../../asm/scripts
 basename=$(basename "$ASM" .gameboy.asm)
 ./build.sh "$ASM" #TODO exit if compile fails
+if [ $? -ne 0 ]; then
+    echo "build failed. exiting..."
+    exit 1
+fi
 popd
 
 echo "replacing correct mem path..."
