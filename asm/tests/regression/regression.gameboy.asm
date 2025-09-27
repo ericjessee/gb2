@@ -11,8 +11,8 @@ SECTION "main", ROM0[$100] ;before $100 are the reset vectors and ISRs
     jp EntryPoint
     db 0
     NINTENDO_LOGO
-    ds $150 - @, 0 ; $100-$150 is the cartridge header, must be untouched
-
+    ds $200 - @, 0 ; $100-$150 is the cartridge header, must be untouched
+    ; leave an extra $50 padding, weirdness happens otherwise...
 EntryPoint:
     ld hl, begin_str ; "Beginning regression..."
     call print_str
@@ -28,6 +28,11 @@ EntryPoint:
     call ldh_a_c
     call ld_a_n16
     call ld_a_r16
+    call ld_hl_r8
+    call ld_hl_d8
+    call ld_n16_a
+    call ld_r16_a
+    call ld_r8_hl
     halt
 
 ;helper subroutines here
@@ -55,6 +60,12 @@ include "regr_jp_cc_a16.inc"
 include "regr_ldh_a_c.inc"
 include "regr_ld_a_n16.inc"
 include "regr_ld_a_r16.inc"
+include "regr_ld_hl_r8.inc"
+include "regr_ld_hl_d8.inc"
+include "regr_ld_n16_a.inc"
+include "regr_ld_r16_a.inc"
+include "regr_ld_r8_hl.inc"
+
 
 begin_str:
     db "Beginning regression...\n", 0
